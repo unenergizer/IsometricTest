@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.3" orientation="isometric" renderorder="right-down" width="4" height="4" tilewidth="32" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="isometric-test.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="4" height="4">
+  <data encoding="csv">
+4,65,65,66,
+3,65,66,65,
+2,66,65,65,
+1,17,33,49
+</data>
+ </layer>
+</map>

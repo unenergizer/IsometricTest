@@ -58,7 +58,7 @@ public class Mouse implements InputProcessor {
 
         cellClicked = screenToCell(screenX, screenY);
 
-        if (!IsometricUtil.isOutOfBounds(cellClicked.x, cellClicked.y)) {
+        if (!IsometricUtil.isOutOfBounds(isometricTest, cellClicked.x, cellClicked.y)) {
             wallPlace(cellClicked.x, cellClicked.y, button);
 
             //Get the tile and the cell
@@ -134,11 +134,8 @@ public class Mouse implements InputProcessor {
     }
 
     private Vector2 worldToCell(float x, float y) {
-        float halfTileWidth = IsometricTest.TILE_WIDTH * 0.5f;
-        float halfTileHeight = IsometricTest.TILE_HEIGHT * 0.5f;
-
-        float row = (1.0f / 2) * (x / halfTileWidth + y / halfTileHeight);
-        float col = (1.0f / 2) * (x / halfTileWidth - y / halfTileHeight);
+        float row = (1.0f / 2) * (x / isometricTest.getTileWidthHalf() + y / isometricTest.getTileHeightHalf());
+        float col = (1.0f / 2) * (x / isometricTest.getTileWidthHalf() - y / isometricTest.getTileHeightHalf());
 
         return new Vector2((int) col, (int) row);
     }
@@ -154,7 +151,7 @@ public class Mouse implements InputProcessor {
 
     private Vector2 screenToCell(float x, float y) {
         Vector2 world = screenToWorld(x, y);
-        world.y -= IsometricTest.TILE_HEIGHT * 0.5f;
+        world.y -= isometricTest.getTileHeight() * 0.5f;
         return worldToCell(world.x, world.y);
     }
 }

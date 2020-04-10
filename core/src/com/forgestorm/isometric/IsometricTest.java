@@ -8,10 +8,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.input.Keyboard;
 import com.forgestorm.isometric.input.Mouse;
@@ -28,11 +28,13 @@ import lombok.Getter;
 public class IsometricTest extends ApplicationAdapter {
 
     private static final Color BACKGROUND = new Color(23 / 255, 35 / 255, 35 / 255, 1);
-    public static final int TILE_WIDTH = 32;
-    public static final int TILE_HEIGHT = 16;
-    public static final int TILE_WIDTH_HALF = TILE_WIDTH / 2;
-    public static final int TILE_HEIGHT_HALF = TILE_HEIGHT / 2;
-    public static final int MAP_SIZE = 16;
+
+    private int mapWidth;
+    private int mapHeight;
+    private int tileWidth;
+    private int tileHeight;
+    private int tileWidthHalf;
+    private int tileHeightHalf;
 
     private SpriteBatch spriteBatch;
     private Texture tileHoverTexture;
@@ -52,20 +54,28 @@ public class IsometricTest extends ApplicationAdapter {
     @Override
     public void create() {
 
+        // Textures
+        spriteBatch = new SpriteBatch();
+        tileHoverTexture = new Texture(Gdx.files.internal("images/tall_selector.png"));
+        wallTexture = new Texture(Gdx.files.internal("images/green_wall2.png"));
+
+        // Init map
+        isoMap = new TmxMapLoader().load("map/small-iso-map.tmx");
+        MapProperties isoMapProperties = isoMap.getProperties();
+        mapWidth = isoMapProperties.get("width", Integer.class);
+        mapHeight = isoMapProperties.get("height", Integer.class);
+        tileWidth = isoMapProperties.get("tilewidth", Integer.class);
+        tileHeight = isoMapProperties.get("tileheight", Integer.class);
+        tileWidthHalf = tileWidth / 2;
+        tileHeightHalf = tileHeight / 2;
+
         // Camera Setup
-        final int mapWidth = TILE_WIDTH * MAP_SIZE;
         camera = new OrthographicCamera(ScreenResolutions.DESKTOP_800_600.getWidth(), ScreenResolutions.DESKTOP_800_600.getHeight());
         camera.position.x = mapWidth / 2;
         camera.update();
 
-        // Textures
-        spriteBatch = new SpriteBatch();
-        tileHoverTexture = new Texture(Gdx.files.internal("images/tall_selector.png"));
-        wallTexture = new Texture(Gdx.files.internal("images/green_wall.png"));
-
-        // Map Setup
-        isoMap = new TmxMapLoader().load("map/iso-map.tmx");
-        mapRenderer = new IsometricTiledMapRenderer(isoMap);
+        // Map renderer
+        mapRenderer = new IsometricTileMapRenderer(isoMap);
         mapRenderer.setView(camera);
         mapRenderer.render();
 
@@ -97,11 +107,11 @@ public class IsometricTest extends ApplicationAdapter {
             Vector2 tempVector;
 
             for (Vector2 vector2 : wallList) {
-                tempVector = IsometricUtil.screenToMap(vector2.x, vector2.y, true);
+                tempVector = IsometricUtil.screenToMap(this, vector2.x, vector2.y, true);
                 spriteBatch.draw(wallTexture, tempVector.x, tempVector.y);
             }
 
-            tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, true);
+            tempVector = IsometricUtil.screenToMap(this, mouse.getCellHovered().x, mouse.getCellHovered().y, true);
             spriteBatch.draw(tileHoverTexture, tempVector.x, tempVector.y);
         }
         spriteBatch.end();

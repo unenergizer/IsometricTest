@@ -1,24 +1,42 @@
 package com.forgestorm.isometric.util;
 
 import com.badlogic.gdx.math.Vector2;
-import com.forgestorm.isometric.IsometricTest;
 
 public class IsometricUtil {
 
 
     private static Vector2 tempVector = new Vector2();
 
-    public static Vector2 screenToMap(float x, float y, int mapWidth, int mapHeight, int tileWidthHalf, int tileHeightHalf, int rotation, boolean stayInGrid) {
+    public static Vector2 screenToMap(float col, float row, int mapWidth, int mapHeight, int tileWidthHalf, int tileHeightHalf, int rotation, boolean stayInGrid) {
         // Test for out of bounds
         if (stayInGrid) {
-            Vector2 outOfBoundsCorrection = outOfBoundsCorrection(x, y, mapWidth, mapHeight, rotation);
-            x = outOfBoundsCorrection.x;
-            y = outOfBoundsCorrection.y;
+            Vector2 outOfBoundsCorrection = outOfBoundsCorrection(col, row, mapWidth, mapHeight, rotation);
+            col = outOfBoundsCorrection.x;
+            row = outOfBoundsCorrection.y;
         }
 
-        // Conversion happens here
-        tempVector.x = (x + y) * tileWidthHalf;
-        tempVector.y = (-x + y) * tileHeightHalf;
+        // Adjust for map rotation
+        return isometricProjection(col, row, tileWidthHalf, tileHeightHalf, rotation);
+    }
+
+    public static Vector2 isometricProjection(float col, float row, int tileWidthHalf, int tileHeightHalf, int rotation) {
+        if (rotation == 0) {
+            // Origin Left
+            tempVector.x = (col + row) * tileWidthHalf;
+            tempVector.y = (row - col) * tileHeightHalf;
+        } else if (rotation == 1) {
+            // Origin Bottom
+            tempVector.x = (col - row) * tileWidthHalf;
+            tempVector.y = (row + col) * tileHeightHalf;
+        } else if (rotation == 2) {
+            // Origin Right
+            tempVector.x = (col + row) * -tileWidthHalf;
+            tempVector.y = (row - col) * -tileHeightHalf;
+        } else if (rotation == 3) {
+            // Origin Top
+            tempVector.x = (col - row) * -tileWidthHalf;
+            tempVector.y = (row + col) * -tileHeightHalf;
+        }
         return tempVector;
     }
 

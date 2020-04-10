@@ -48,7 +48,7 @@ public class Debug extends VisTable implements Buildable, Updatable {
         fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
 
         int rotation = (isometricTest.getMapRotation() + 1) * 90;
-        rotationLabel.setText("Rotation: " + rotation + "°");
+        rotationLabel.setText("Rotation: " + rotation + ", Num: " + isometricTest.getMapRotation());
         pack();
     }
 }

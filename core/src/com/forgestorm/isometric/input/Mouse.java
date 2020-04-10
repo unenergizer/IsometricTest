@@ -64,6 +64,7 @@ public class Mouse implements InputProcessor {
             //Get the tile and the cell
             TiledMapTileLayer layer = (TiledMapTileLayer) isometricTest.getIsoMap().getLayers().get(0);
             TiledMapTileLayer.Cell tileCell = layer.getCell((int) cellClicked.x, (int) cellClicked.y);
+            // TODO: tile cell can be null
             if (tileCell.getTile() != null) tileClicked = tileCell.getTile();
 
             //Flip the tile just so you have a visual to make sure your selected the right tile
@@ -134,24 +135,43 @@ public class Mouse implements InputProcessor {
     }
 
     private Vector2 worldToCell(float x, float y) {
-        float row = (1.0f / 2) * (x / isometricTest.getTileWidthHalf() + y / isometricTest.getTileHeightHalf());
-        float col = (1.0f / 2) * (x / isometricTest.getTileWidthHalf() - y / isometricTest.getTileHeightHalf());
+        int rotation = isometricTest.getMapRotation();
 
-        return new Vector2((int) col, (int) row);
+        float col = 0, row = 0;
+
+        if (rotation == 0) {
+            col = (x / isometricTest.getTileWidthHalf() - y / isometricTest.getTileHeightHalf()) * .5f;
+            row = (x / isometricTest.getTileWidthHalf() + y / isometricTest.getTileHeightHalf()) * .5f;
+        } else if (rotation == 1) {
+            col = (y / isometricTest.getTileHeightHalf() + x / isometricTest.getTileWidthHalf()) * .5f;
+            row = (y / isometricTest.getTileHeightHalf() - x / isometricTest.getTileWidthHalf()) * .5f;
+            row += 1;
+        } else if (rotation == 2) {
+            col = -(x / isometricTest.getTileWidthHalf() - y / isometricTest.getTileHeightHalf()) * .5f;
+            row = -(x / isometricTest.getTileWidthHalf() + y / isometricTest.getTileHeightHalf()) * .5f;
+            col += 1;
+            row += 1;
+        } else if (rotation == 3) {
+            col = -(y / isometricTest.getTileHeightHalf() + x / isometricTest.getTileWidthHalf()) * .5f;
+            row = -(y / isometricTest.getTileHeightHalf() - x / isometricTest.getTileWidthHalf()) * .5f;
+            col += 1;
+        }
+
+        return new Vector2((int) (col), (int) (row));
     }
 
     private Vector2 screenToWorld(float x, float y) {
         Vector3 touch = new Vector3(x, y, 0);
         camera.unproject(touch);
-        touch.mul(invIsoTransform);
-        touch.mul(isoTransform);
+//        touch.mul(invIsoTransform); // Joseph said this is not necessary.
+//        touch.mul(isoTransform);
         return new Vector2(touch.x, touch.y);
     }
 
 
     private Vector2 screenToCell(float x, float y) {
         Vector2 world = screenToWorld(x, y);
-        world.y -= isometricTest.getTileHeight() * 0.5f;
+        world.y -= isometricTest.getTileHeightHalf();
         return worldToCell(world.x, world.y);
     }
 }

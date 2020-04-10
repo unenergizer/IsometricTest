@@ -20,6 +20,9 @@ import com.forgestorm.isometric.util.IsometricUtil;
 import com.forgestorm.isometric.util.ScreenResolutions;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.Getter;
@@ -44,6 +47,7 @@ public class IsometricTest extends ApplicationAdapter {
     private Texture tileHoverTexture;
 
     private List<Vector2> wallList = new ArrayList<>();
+
     private Texture wallTexture;
 
     private OrthographicCamera camera;
@@ -109,6 +113,27 @@ public class IsometricTest extends ApplicationAdapter {
         spriteBatch.begin();
         if (mouse.getCellHovered() != null) {
             Vector2 tempVector;
+
+            Collections.sort(wallList, new Comparator<Vector2>() {
+                        @Override
+                        public int compare(Vector2 xy1, Vector2 xy2) {
+                            int x1 = (int) xy1.x;
+                            int y1 = (int) xy1.y;
+                            int x2 = (int) xy2.x;
+                            int y2 = (int) xy2.y;
+                            if (mapRotation == 0) {
+                                return (y2 - x2) - (y1 - x1);
+                            } else if (mapRotation == 1) {
+                                return (y2 + x2) - (y1 + x1);
+                            } else if (mapRotation == 2) {
+                                return (x2 - y2) - (x1 - y1);
+                            } else {
+                                return (-x2 - y2) - (-x1 - y1);
+                            }
+                        }
+                    }
+            );
+
 
             for (Vector2 vector2 : wallList) {
                 tempVector = IsometricUtil.screenToMap(vector2.x, vector2.y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);

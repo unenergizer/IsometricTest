@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.forgestorm.isometric.util.IsometricUtil;
 
 import static com.badlogic.gdx.graphics.g2d.Batch.C1;
 import static com.badlogic.gdx.graphics.g2d.Batch.C2;
@@ -100,9 +101,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         // offset in tiled is y down, so we flip it
         final float layerOffsetY = -layer.getRenderOffsetY() * unitScale;
 
-        float halfTileWidth = tileWidth * 0.5f;
-        float halfTileHeight = tileHeight * 0.5f;
-
         // setting up the screen points
         // COL1
         topRight.set(viewBounds.x + viewBounds.width - layerOffsetX, viewBounds.y - layerOffsetY);
@@ -114,38 +112,18 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         bottomRight.set(viewBounds.x + viewBounds.width - layerOffsetX, viewBounds.y + viewBounds.height - layerOffsetY);
 
         // transforming screen coordinates to iso coordinates
-        int row1 = (int) (translateScreenToIso(topLeft).y / tileWidth) - 2;
-        int row2 = (int) (translateScreenToIso(bottomRight).y / tileWidth) + 2;
+        int row1 = (int) (translateScreenToIso(topLeft).y / tileWidth);
+        int row2 = (int) (translateScreenToIso(bottomRight).y / tileWidth);
 
-        int col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth) - 2;
-        int col2 = (int) (translateScreenToIso(topRight).x / tileWidth) + 2;
+        int col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth);
+        int col2 = (int) (translateScreenToIso(topRight).x / tileWidth);
 
         int rotation = isometricTest.getMapRotation();
 
         for (int row = row2; row >= row1; row--) {
             for (int col = col1; col <= col2; col++) {
-
-                float x = 0, y = 0;
-
-                if (rotation == 0) {
-                    // Origin Left
-                    x = (col + row) * halfTileWidth;
-                    y = (row - col) * halfTileHeight;
-                } else if (rotation == 1) {
-                    // Origin Bottom
-                    x = (col - row) * halfTileWidth;
-                    y = (row + col) * halfTileHeight;
-                } else if (rotation == 2) {
-                    // Origin Right
-                    x = (col + row) * -halfTileWidth;
-                    y = (row - col) * -halfTileHeight;
-                } else if (rotation == 3) {
-                    // Origin Top
-                    x = (col - row) * -halfTileWidth;
-                    y = (row + col) * -halfTileHeight;
-                }
-
-                renderRotation(layer, color, col, row, x, y, layerOffsetX, layerOffsetY);
+                Vector2 tempVector = IsometricUtil.isometricProjection(col, row, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), rotation);
+                renderRotation(layer, color, col, row, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
             }
         }
     }

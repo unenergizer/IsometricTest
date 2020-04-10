@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class IsometricTest extends ApplicationAdapter {
@@ -35,6 +36,9 @@ public class IsometricTest extends ApplicationAdapter {
     private int tileHeight;
     private int tileWidthHalf;
     private int tileHeightHalf;
+
+    @Setter
+    private int mapRotation = 0;
 
     private SpriteBatch spriteBatch;
     private Texture tileHoverTexture;
@@ -75,7 +79,7 @@ public class IsometricTest extends ApplicationAdapter {
         camera.update();
 
         // Map renderer
-        mapRenderer = new IsometricTileMapRenderer(isoMap);
+        mapRenderer = new IsometricTileMapRenderer(this, isoMap);
         mapRenderer.setView(camera);
         mapRenderer.render();
 
@@ -84,7 +88,7 @@ public class IsometricTest extends ApplicationAdapter {
         stageHandler.buildActors();
 
         // Register Input
-        keyboard = new Keyboard(camera);
+        keyboard = new Keyboard(this, camera);
         mouse = new Mouse(this);
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(stageHandler.getStage());

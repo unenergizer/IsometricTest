@@ -35,6 +35,8 @@ import static com.badlogic.gdx.graphics.g2d.Batch.Y4;
 
 public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
+    private IsometricTest isometricTest;
+
     private Matrix4 isoTransform;
     private Matrix4 invIsotransform;
     private Vector3 screenPos = new Vector3();
@@ -44,9 +46,10 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     private Vector2 topLeft = new Vector2();
     private Vector2 bottomRight = new Vector2();
 
-    public IsometricTileMapRenderer(TiledMap map) {
+    public IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map) {
         super(map);
         init();
+        this.isometricTest = isometricTest;
     }
 
     public IsometricTileMapRenderer(TiledMap map, Batch batch) {
@@ -117,7 +120,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         int col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth) - 2;
         int col2 = (int) (translateScreenToIso(topRight).x / tileWidth) + 2;
 
-        int rotation = 1;
+        int rotation = isometricTest.getMapRotation();
 
         for (int row = row2; row >= row1; row--) {
             for (int col = col1; col <= col2; col++) {
@@ -133,13 +136,13 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                     x = (col - row) * halfTileWidth;
                     y = (row + col) * halfTileHeight;
                 } else if (rotation == 2) {
-                    // TODO: Right
-                    x = (col + row) * halfTileWidth;
-                    y = (row - col) * halfTileHeight;
+                    // Origin Right
+                    x = (col + row) * -halfTileWidth;
+                    y = (row - col) * -halfTileHeight;
                 } else if (rotation == 3) {
-                    // TODO: Top
-                    x = (col - row) * halfTileWidth;
-                    y = (row + col) * halfTileHeight;
+                    // Origin Top
+                    x = (col - row) * -halfTileWidth;
+                    y = (row + col) * -halfTileHeight;
                 }
 
                 renderRotation(layer, color, col, row, x, y, layerOffsetX, layerOffsetY);

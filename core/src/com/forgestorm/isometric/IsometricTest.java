@@ -111,11 +111,11 @@ public class IsometricTest extends ApplicationAdapter {
             Vector2 tempVector;
 
             for (Vector2 vector2 : wallList) {
-                tempVector = IsometricUtil.screenToMap(this, vector2.x, vector2.y, true);
+                tempVector = IsometricUtil.screenToMap(vector2.x, vector2.y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
                 spriteBatch.draw(wallTexture, tempVector.x, tempVector.y);
             }
 
-            tempVector = IsometricUtil.screenToMap(this, mouse.getCellHovered().x, mouse.getCellHovered().y, true);
+            tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
             spriteBatch.draw(tileHoverTexture, tempVector.x, tempVector.y);
         }
         spriteBatch.end();

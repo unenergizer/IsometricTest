@@ -58,7 +58,7 @@ public class Mouse implements InputProcessor {
 
         cellClicked = screenToCell(screenX, screenY);
 
-        if (!IsometricUtil.isOutOfBounds(isometricTest, cellClicked.x, cellClicked.y)) {
+        if (!IsometricUtil.isOutOfBounds(cellClicked.x, cellClicked.y, isometricTest.getMapWidth(), isometricTest.getMapHeight(), isometricTest.getMapRotation())) {
             wallPlace(cellClicked.x, cellClicked.y, button);
 
             //Get the tile and the cell

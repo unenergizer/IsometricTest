@@ -20,7 +20,6 @@ import com.forgestorm.isometric.util.IsometricUtil;
 import com.forgestorm.isometric.util.ScreenResolutions;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -46,7 +45,7 @@ public class IsometricTest extends ApplicationAdapter {
     private SpriteBatch spriteBatch;
     private Texture tileHoverTexture;
 
-    private List<Vector2> wallList = new ArrayList<>();
+    private List<Vector2> objectList = new ArrayList<>();
 
     private Texture wallTexture;
 
@@ -83,7 +82,7 @@ public class IsometricTest extends ApplicationAdapter {
         camera.update();
 
         // Map renderer
-        mapRenderer = new IsometricTileMapRenderer(this, isoMap);
+        mapRenderer = new IsometricTileMapRenderer(this, isoMap, spriteBatch);
         mapRenderer.setView(camera);
         mapRenderer.render();
 
@@ -114,32 +113,37 @@ public class IsometricTest extends ApplicationAdapter {
         if (mouse.getCellHovered() != null) {
             Vector2 tempVector;
 
-            Collections.sort(wallList, new Comparator<Vector2>() {
+            Collections.sort(objectList, new Comparator<Vector2>() {
                         @Override
                         public int compare(Vector2 xy1, Vector2 xy2) {
-                            int x1 = (int) xy1.x;
-                            int y1 = (int) xy1.y;
-                            int x2 = (int) xy2.x;
-                            int y2 = (int) xy2.y;
+                            float x1 = xy1.x;
+                            float y1 = xy1.y;
+                            float x2 = xy2.x;
+                            float y2 = xy2.y;
                             if (mapRotation == 0) {
-                                return (y2 - x2) - (y1 - x1);
+                                if ((y2 - x2) > (y1 - x1)) {
+                                    return 1;
+                                }
+                                return -1;
+                                //return (int) ((y2 - x2) - (y1 - x1));
                             } else if (mapRotation == 1) {
-                                return (y2 + x2) - (y1 + x1);
+                                return (int) ((y2 + x2) - (y1 + x1));
                             } else if (mapRotation == 2) {
-                                return (x2 - y2) - (x1 - y1);
+                                return (int) ((x2 - y2) - (x1 - y1));
                             } else {
-                                return (-x2 - y2) - (-x1 - y1);
+                                return (int) ((-x2 - y2) - (-x1 - y1));
                             }
                         }
                     }
             );
 
-
-            for (Vector2 vector2 : wallList) {
+            // Sort and draw objects
+            for (Vector2 vector2 : objectList) {
                 tempVector = IsometricUtil.screenToMap(vector2.x, vector2.y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
                 spriteBatch.draw(wallTexture, tempVector.x, tempVector.y);
             }
 
+            // Draw mouse wireframe
             tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
             spriteBatch.draw(tileHoverTexture, tempVector.x, tempVector.y);
         }

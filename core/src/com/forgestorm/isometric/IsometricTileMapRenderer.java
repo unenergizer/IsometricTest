@@ -38,8 +38,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
     private IsometricTest isometricTest;
 
-    private Matrix4 isoTransform;
-    private Matrix4 invIsotransform;
+    private Matrix4 invIsoTransform;
     private Vector3 screenPos = new Vector3();
 
     private Vector2 topRight = new Vector2();
@@ -47,30 +46,15 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     private Vector2 topLeft = new Vector2();
     private Vector2 bottomRight = new Vector2();
 
-    public IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map) {
-        super(map);
+    IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map, Batch batch) {
+        super(map, batch);
         init();
         this.isometricTest = isometricTest;
     }
 
-    public IsometricTileMapRenderer(TiledMap map, Batch batch) {
-        super(map, batch);
-        init();
-    }
-
-    public IsometricTileMapRenderer(TiledMap map, float unitScale) {
-        super(map, unitScale);
-        init();
-    }
-
-    public IsometricTileMapRenderer(TiledMap map, float unitScale, Batch batch) {
-        super(map, unitScale, batch);
-        init();
-    }
-
     private void init() {
         // create the isometric transform
-        isoTransform = new Matrix4();
+        Matrix4 isoTransform = new Matrix4();
         isoTransform.idt();
 
         // isoTransform.translate(0, 32, 0);
@@ -78,13 +62,13 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         isoTransform.rotate(0.0f, 0.0f, 1.0f, -45);
 
         // ... and the inverse matrix
-        invIsotransform = new Matrix4(isoTransform);
-        invIsotransform.inv();
+        invIsoTransform = new Matrix4(isoTransform);
+        invIsoTransform.inv();
     }
 
     private Vector3 translateScreenToIso(Vector2 vec) {
         screenPos.set(vec.x, vec.y, 0);
-        screenPos.mul(invIsotransform);
+        screenPos.mul(invIsoTransform);
 
         return screenPos;
     }
@@ -95,7 +79,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         final float color = Color.toFloatBits(batchColor.r, batchColor.g, batchColor.b, batchColor.a * layer.getOpacity());
 
         float tileWidth = layer.getTileWidth() * unitScale;
-        float tileHeight = layer.getTileHeight() * unitScale;
 
         final float layerOffsetX = layer.getRenderOffsetX() * unitScale;
         // offset in tiled is y down, so we flip it

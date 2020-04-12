@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -44,10 +45,11 @@ public class IsometricTest extends ApplicationAdapter {
 
     private SpriteBatch spriteBatch;
     private Texture tileHoverTexture;
+    private List<Texture> loadedTextures = new ArrayList<>();
 
-    private List<Vector2> objectList = new ArrayList<>();
-
-    private Texture wallTexture;
+    private List<TileObject> objectList = new ArrayList<>();
+    @Setter
+    private boolean sortNeeded = true;
 
     private OrthographicCamera camera;
     private MapRenderer mapRenderer;
@@ -64,10 +66,18 @@ public class IsometricTest extends ApplicationAdapter {
         // Textures
         spriteBatch = new SpriteBatch();
         tileHoverTexture = new Texture(Gdx.files.internal("images/tall_selector.png"));
-        wallTexture = new Texture(Gdx.files.internal("images/green_wall2.png"));
+
+        loadedTextures.add(new Texture("images/grass_custom_03.png"));
+        loadedTextures.add(new Texture("images/grass_custom_01.png"));
+        loadedTextures.add(new Texture("images/grass_custom_02.png"));
+        loadedTextures.add(new Texture("images/grass_custom_04.png"));
+        loadedTextures.add(new Texture("images/water_custom_01.png"));
+        loadedTextures.add(new Texture("images/water_custom_02.png"));
+//        loadedTextures.add(new Texture("images/green_wall.png"));
+        loadedTextures.add(new Texture("images/green_wall2.png"));
 
         // Init map
-        isoMap = new TmxMapLoader().load("map/small-iso-map.tmx");
+        isoMap = new TmxMapLoader().load("map/big-iso-map.tmx");
         MapProperties isoMapProperties = isoMap.getProperties();
         mapWidth = isoMapProperties.get("width", Integer.class);
         mapHeight = isoMapProperties.get("height", Integer.class);
@@ -75,6 +85,19 @@ public class IsometricTest extends ApplicationAdapter {
         tileHeight = isoMapProperties.get("tileheight", Integer.class);
         tileWidthHalf = tileWidth / 2;
         tileHeightHalf = tileHeight / 2;
+
+        // Place random tiles
+        int loadedTiles = loadedTextures.size();
+        int totalTiles = mapWidth * mapHeight;
+
+        System.out.println("LoadedTiles: " + loadedTiles + ", TotalTiles: " + totalTiles);
+
+        Random random = new Random();
+        for (int i = 0; i < mapWidth; i++) {
+            for (int j = 0; j < mapHeight; j++) {
+                objectList.add(new TileObject(new Vector2(i, j), random.nextInt(loadedTiles)));
+            }
+        }
 
         // Camera Setup
         camera = new OrthographicCamera(ScreenResolutions.DESKTOP_800_600.getWidth(), ScreenResolutions.DESKTOP_800_600.getHeight());
@@ -113,34 +136,41 @@ public class IsometricTest extends ApplicationAdapter {
         if (mouse.getCellHovered() != null) {
             Vector2 tempVector;
 
-            Collections.sort(objectList, new Comparator<Vector2>() {
-                        @Override
-                        public int compare(Vector2 xy1, Vector2 xy2) {
-                            float x1 = xy1.x;
-                            float y1 = xy1.y;
-                            float x2 = xy2.x;
-                            float y2 = xy2.y;
-                            if (mapRotation == 0) {
-                                if ((y2 - x2) > (y1 - x1)) {
-                                    return 1;
+            if (sortNeeded) {
+                Collections.sort(objectList, new Comparator<TileObject>() {
+                            @Override
+                            public int compare(TileObject tileObject21, TileObject tileObject2) {
+                                Vector2 xy1 = tileObject21.getTileCords();
+                                Vector2 xy2 = tileObject2.getTileCords();
+
+                                float x1 = xy1.x;
+                                float y1 = xy1.y;
+                                float x2 = xy2.x;
+                                float y2 = xy2.y;
+                                if (mapRotation == 0) {
+                                    // Moving objects or objects placed within a tile
+//                                if ((y2 - x2) > (y1 - x1)) {
+//                                    return 1;
+//                                }
+//                                return -1;
+                                    return (int) ((y2 - x2) - (y1 - x1));
+                                } else if (mapRotation == 1) {
+                                    return (int) ((y2 + x2) - (y1 + x1));
+                                } else if (mapRotation == 2) {
+                                    return (int) ((x2 - y2) - (x1 - y1));
+                                } else {
+                                    return (int) ((-x2 - y2) - (-x1 - y1));
                                 }
-                                return -1;
-                                //return (int) ((y2 - x2) - (y1 - x1));
-                            } else if (mapRotation == 1) {
-                                return (int) ((y2 + x2) - (y1 + x1));
-                            } else if (mapRotation == 2) {
-                                return (int) ((x2 - y2) - (x1 - y1));
-                            } else {
-                                return (int) ((-x2 - y2) - (-x1 - y1));
                             }
                         }
-                    }
-            );
+                );
+                setSortNeeded(false);
+            }
 
             // Sort and draw objects
-            for (Vector2 vector2 : objectList) {
-                tempVector = IsometricUtil.screenToMap(vector2.x, vector2.y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
-                spriteBatch.draw(wallTexture, tempVector.x, tempVector.y);
+            for (TileObject tileObject : objectList) {
+                tempVector = IsometricUtil.screenToMap(tileObject.getTileCords().x, tileObject.getTileCords().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
+                spriteBatch.draw(loadedTextures.get(tileObject.getUsedTextureIndex()), tempVector.x, tempVector.y);
             }
 
             // Draw mouse wireframe
@@ -166,7 +196,7 @@ public class IsometricTest extends ApplicationAdapter {
         isoMap.dispose();
         stageHandler.dispose();
         tileHoverTexture.dispose();
-        wallTexture.dispose();
+        for (Texture texture : loadedTextures) texture.dispose();
         spriteBatch.dispose();
     }
 }

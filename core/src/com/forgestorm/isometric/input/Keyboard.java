@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.forgestorm.isometric.IsometricTest;
+import com.forgestorm.isometric.util.IsometricUtil;
 
 public class Keyboard implements InputProcessor {
 
@@ -24,10 +25,26 @@ public class Keyboard implements InputProcessor {
         if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x -= 10;
 
         // Rotate Map
-        if (keycode == Input.Keys.NUMPAD_0) isometricTest.setMapRotation(0);
-        if (keycode == Input.Keys.NUMPAD_1) isometricTest.setMapRotation(1);
-        if (keycode == Input.Keys.NUMPAD_2) isometricTest.setMapRotation(2);
-        if (keycode == Input.Keys.NUMPAD_3) isometricTest.setMapRotation(3);
+        int lastRotation = isometricTest.getMapRotation();
+        if (keycode == Input.Keys.NUMPAD_0) {
+            isometricTest.setMapRotation(0);
+            isometricTest.setSortNeeded(true);
+        }
+        if (keycode == Input.Keys.NUMPAD_1) {
+            isometricTest.setMapRotation(1);
+            isometricTest.setSortNeeded(true);
+        }
+        if (keycode == Input.Keys.NUMPAD_2) {
+            isometricTest.setMapRotation(2);
+            isometricTest.setSortNeeded(true);
+        }
+        if (keycode == Input.Keys.NUMPAD_3) {
+            isometricTest.setMapRotation(3);
+            isometricTest.setSortNeeded(true);
+        }
+        int nextRotation = isometricTest.getMapRotation();
+        if (lastRotation != nextRotation)
+            IsometricUtil.cameraFix(camera, lastRotation, nextRotation);
         return true;
     }
 

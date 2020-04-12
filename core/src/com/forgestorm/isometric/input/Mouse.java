@@ -2,10 +2,12 @@ package com.forgestorm.isometric.input;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.IsometricTest;
+import com.forgestorm.isometric.TileObject;
 import com.forgestorm.isometric.util.IsometricUtil;
 import com.forgestorm.isometric.util.ScreenResolutions;
 
@@ -17,7 +19,7 @@ import lombok.Getter;
 public class Mouse implements InputProcessor {
 
     private static final float ZOOM_MIN = .25f;
-    private static final float ZOOM_MAX = 1f;
+    private static final float ZOOM_MAX = 10f;
 
     private final IsometricTest isometricTest;
     private final OrthographicCamera camera;
@@ -56,14 +58,37 @@ public class Mouse implements InputProcessor {
     }
 
     private void wallPlace(float x, float y, int button) {
-        List<Vector2> wallList = isometricTest.getObjectList();
+        List<Texture> textureList = isometricTest.getLoadedTextures();
+        List<TileObject> testObjectList = isometricTest.getObjectList();
+        TileObject tileObject = new TileObject(new Vector2(x, y), 0);
 
         if (button == 0) {
+
+            boolean tileObjectFound = false;
+            for (TileObject loadedObject : testObjectList) {
+                if (tileObject.equals(loadedObject)) {
+                    System.out.println("Found matching tile");
+                    int index = loadedObject.getUsedTextureIndex();
+                    index++;
+                    if (index == textureList.size()) {
+                        index = 0;
+                    }
+                    loadedObject.setUsedTextureIndex(index);
+                    tileObjectFound = true;
+                    break;
+                }
+            }
+
             // Place wall
-            wallList.add(new Vector2(x, y));
+            if (!tileObjectFound) testObjectList.add(tileObject);
         } else if (button == 1) {
             // Remove Wall
-            wallList.remove(new Vector2(x, y));
+            for (TileObject loadedObject : testObjectList) {
+                if (tileObject.equals(loadedObject)) {
+                    testObjectList.remove(loadedObject);
+                    break;
+                }
+            }
         }
 
     }

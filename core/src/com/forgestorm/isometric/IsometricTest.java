@@ -50,6 +50,7 @@ public class IsometricTest extends ApplicationAdapter {
     private List<TileObject> objectList = new ArrayList<>();
     @Setter
     private boolean sortNeeded = true;
+    private TileComparator tileComparator;
 
     private OrthographicCamera camera;
     private MapRenderer mapRenderer;
@@ -85,6 +86,8 @@ public class IsometricTest extends ApplicationAdapter {
         tileHeight = isoMapProperties.get("tileheight", Integer.class);
         tileWidthHalf = tileWidth / 2;
         tileHeightHalf = tileHeight / 2;
+
+        tileComparator = new TileComparator(this);
 
         // Place random tiles
         int loadedTiles = loadedTextures.size();
@@ -123,6 +126,8 @@ public class IsometricTest extends ApplicationAdapter {
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
+    private Vector2 tempVector;
+
     @Override
     public void render() {
         Gdx.gl.glClearColor(BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, BACKGROUND.a);
@@ -133,50 +138,25 @@ public class IsometricTest extends ApplicationAdapter {
 
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
+
+        // Sort map objects
+        if (sortNeeded) {
+            Collections.sort(objectList, tileComparator);
+            setSortNeeded(false);
+        }
+
+        // Draw map objects
+        for (TileObject tileObject : objectList) {
+            tempVector = IsometricUtil.screenToMap(tileObject.getTileCords().x, tileObject.getTileCords().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
+            spriteBatch.draw(loadedTextures.get(tileObject.getUsedTextureIndex()), tempVector.x, tempVector.y);
+        }
+
+        // Draw mouse wireframe
         if (mouse.getCellHovered() != null) {
-            Vector2 tempVector;
-
-            if (sortNeeded) {
-                Collections.sort(objectList, new Comparator<TileObject>() {
-                            @Override
-                            public int compare(TileObject tileObject21, TileObject tileObject2) {
-                                Vector2 xy1 = tileObject21.getTileCords();
-                                Vector2 xy2 = tileObject2.getTileCords();
-
-                                float x1 = xy1.x;
-                                float y1 = xy1.y;
-                                float x2 = xy2.x;
-                                float y2 = xy2.y;
-                                if (mapRotation == 0) {
-                                    // Moving objects or objects placed within a tile
-//                                if ((y2 - x2) > (y1 - x1)) {
-//                                    return 1;
-//                                }
-//                                return -1;
-                                    return (int) ((y2 - x2) - (y1 - x1));
-                                } else if (mapRotation == 1) {
-                                    return (int) ((y2 + x2) - (y1 + x1));
-                                } else if (mapRotation == 2) {
-                                    return (int) ((x2 - y2) - (x1 - y1));
-                                } else {
-                                    return (int) ((-x2 - y2) - (-x1 - y1));
-                                }
-                            }
-                        }
-                );
-                setSortNeeded(false);
-            }
-
-            // Sort and draw objects
-            for (TileObject tileObject : objectList) {
-                tempVector = IsometricUtil.screenToMap(tileObject.getTileCords().x, tileObject.getTileCords().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
-                spriteBatch.draw(loadedTextures.get(tileObject.getUsedTextureIndex()), tempVector.x, tempVector.y);
-            }
-
-            // Draw mouse wireframe
             tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
             spriteBatch.draw(tileHoverTexture, tempVector.x, tempVector.y);
         }
+
         spriteBatch.end();
 
         stageHandler.update(Gdx.graphics.getDeltaTime(), this);

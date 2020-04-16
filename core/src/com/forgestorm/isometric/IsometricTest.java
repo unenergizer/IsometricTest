@@ -102,7 +102,11 @@ public class IsometricTest extends ApplicationAdapter {
 
         // Camera Setup
         camera = new OrthographicCamera(ScreenResolutions.DESKTOP_800_600.getWidth(), ScreenResolutions.DESKTOP_800_600.getHeight());
-        camera.position.x = mapWidth / 2;
+
+        // Set camera to map origin x0, y0.
+        Vector2 tempVector = IsometricUtil.isometricProjection(0, 0, tileWidthHalf, tileHeightHalf, mapRotation);
+        camera.position.x = tempVector.x;
+        camera.position.y = tempVector.y;
         camera.update();
 
         // Map renderer

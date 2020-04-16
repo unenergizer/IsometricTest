@@ -21,9 +21,7 @@ import com.forgestorm.isometric.util.ScreenResolutions;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -68,6 +66,7 @@ public class IsometricTest extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
         tileHoverTexture = new Texture(Gdx.files.internal("images/tall_selector.png"));
 
+        loadedTextures.add(new Texture("images/square_box.png"));
         loadedTextures.add(new Texture("images/grass_custom_03.png"));
         loadedTextures.add(new Texture("images/grass_custom_01.png"));
         loadedTextures.add(new Texture("images/grass_custom_02.png"));
@@ -95,10 +94,9 @@ public class IsometricTest extends ApplicationAdapter {
 
         System.out.println("LoadedTiles: " + loadedTiles + ", TotalTiles: " + totalTiles);
 
-        Random random = new Random();
         for (int i = 0; i < mapWidth; i++) {
             for (int j = 0; j < mapHeight; j++) {
-                objectList.add(new TileObject(new Vector2(i, j), random.nextInt(loadedTiles)));
+                objectList.add(new TileObject(new Vector2(i, j), 1));
             }
         }
 
@@ -132,6 +130,16 @@ public class IsometricTest extends ApplicationAdapter {
     public void render() {
         Gdx.gl.glClearColor(BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, BACKGROUND.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Rotate camera around clicked tile
+        if (sortNeeded) {
+            if (mouse.getCellClicked() != null) {
+                Vector2 tempVector = IsometricUtil.isometricProjection(mouse.getCellClicked().x, mouse.getCellClicked().y, tileWidthHalf, tileHeightHalf, mapRotation);
+                camera.position.x = tempVector.x;
+                camera.position.y = tempVector.y;
+            }
+        }
+
         camera.update();
         mapRenderer.setView(camera);
         mapRenderer.render();

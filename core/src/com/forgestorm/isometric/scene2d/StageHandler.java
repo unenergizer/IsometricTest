@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.forgestorm.isometric.IsometricTest;
+import com.forgestorm.isometric.scene2d.actors.CenterScreen;
 import com.forgestorm.isometric.scene2d.actors.Debug;
 import com.forgestorm.isometric.scene2d.actors.WorldBuilder;
 import com.kotcrab.vis.ui.VisUI;
@@ -23,10 +24,12 @@ public class StageHandler {
 
     private Debug debug = new Debug();
     private WorldBuilder worldBuilder = new WorldBuilder();
+    private CenterScreen centerScreen = new CenterScreen();
 
     public void buildActors() {
         stage.addActor(worldBuilder.build(this));
         stage.addActor(debug.build(this));
+        stage.addActor(centerScreen.build(this));
     }
 
     public void update(float delta, IsometricTest isometricTest) {

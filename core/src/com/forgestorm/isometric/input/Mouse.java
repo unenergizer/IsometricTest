@@ -42,6 +42,11 @@ public class Mouse implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         cellClicked = IsometricUtil.screenToCell(camera, screenX, screenY, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
 
+        // Center camera on Tile Click location
+        Vector2 tempVector = IsometricUtil.isometricProjection(cellClicked.x, cellClicked.y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
+        camera.position.x = tempVector.x;
+        camera.position.y = tempVector.y;
+
         if (!IsometricUtil.isOutOfBounds(cellClicked.x, cellClicked.y, isometricTest.getMapWidth(), isometricTest.getMapHeight(), isometricTest.getMapRotation())) {
             wallPlace(cellClicked.x, cellClicked.y, button);
 

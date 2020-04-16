@@ -25,7 +25,6 @@ public class Keyboard implements InputProcessor {
         if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x -= 10;
 
         // Rotate Map
-        int lastRotation = isometricTest.getMapRotation();
         if (keycode == Input.Keys.NUMPAD_0) {
             isometricTest.setMapRotation(0);
             isometricTest.setSortNeeded(true);
@@ -42,9 +41,6 @@ public class Keyboard implements InputProcessor {
             isometricTest.setMapRotation(3);
             isometricTest.setSortNeeded(true);
         }
-        int nextRotation = isometricTest.getMapRotation();
-        if (lastRotation != nextRotation)
-            IsometricUtil.cameraFix(camera, lastRotation, nextRotation);
         return true;
     }
 

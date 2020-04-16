@@ -6,34 +6,6 @@ import com.badlogic.gdx.math.Vector3;
 
 public class IsometricUtil {
 
-    public static void cameraFix(Camera camera, int lastRotation, int nextRotation) {
-        System.out.println("LastRotation: " + lastRotation + ", NextRotation: " + nextRotation);
-        System.out.println("[OLD]Camera X: " + camera.position.x + ", Camera Y: " + camera.position.y);
-//        if (nextRotation == 0) {
-//            // Origin Left
-//            if (lastRotation == 3) {
-//                camera.position.x = camera.position.x * 2;
-//                camera.position.y = camera.position.y * 2;
-//            } else {
-//                camera.position.x = camera.position.x / 2;
-//                camera.position.y = camera.position.y / 2;
-//            }
-//        } else if (nextRotation == 1) {
-//            // Origin Bottom
-//            camera.position.x = camera.position.x;
-//            camera.position.y = camera.position.y;
-//        } else if (nextRotation == 2) {
-//            // Origin Right
-//            camera.position.x = camera.position.x;
-//            camera.position.y = camera.position.y;
-//        } else if (nextRotation == 3) {
-//            // Origin Top
-//            camera.position.x = camera.position.x;
-//            camera.position.y = camera.position.y;
-//        }
-        System.out.println("[NEW]Camera X: " + camera.position.x + ", Camera Y: " + camera.position.y);
-    }
-
     public static Vector2 screenToMap(float col, float row, int mapWidth, int mapHeight, int tileWidthHalf, int tileHeightHalf, int rotation, boolean stayInGrid) {
         // Test for out of bounds
         if (stayInGrid) {
@@ -112,17 +84,10 @@ public class IsometricUtil {
         return new Vector2((int) (col), (int) (row));
     }
 
-    private static Vector2 screenToWorld(Camera camera, float x, float y) {
-        Vector3 touch = new Vector3(x, y, 0);
-        camera.unproject(touch);
-//        touch.mul(invIsoTransform); // Joseph said this is not necessary.
-//        touch.mul(isoTransform);
-        return new Vector2(touch.x, touch.y);
-    }
-
     public static Vector2 screenToCell(Camera camera, float x, float y, int tileWidthHalf, int tileHeightHalf, int rotation) {
-        Vector2 world = screenToWorld(camera, x, y);
-        world.y -= tileHeightHalf;
-        return worldToCell(world.x, world.y, tileWidthHalf, tileHeightHalf, rotation);
+        Vector3 cursorLocation = new Vector3(x, y, 0);
+        camera.unproject(cursorLocation);
+        cursorLocation.y -= tileHeightHalf;
+        return worldToCell(cursorLocation.x, cursorLocation.y, tileWidthHalf, tileHeightHalf, rotation);
     }
 }

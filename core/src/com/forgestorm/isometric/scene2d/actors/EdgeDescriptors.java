@@ -3,55 +3,79 @@ package com.forgestorm.isometric.scene2d.actors;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.forgestorm.isometric.IsometricTest;
+import com.forgestorm.isometric.scene2d.Buildable;
 import com.forgestorm.isometric.scene2d.StageHandler;
 import com.forgestorm.isometric.scene2d.Updatable;
 import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
-import com.forgestorm.isometric.scene2d.Buildable;
 
 public class EdgeDescriptors extends Actor implements Buildable, Updatable {
 
 
-    private VisLabel startXlabel = new VisLabel("StartX: 00");
-    private VisLabel startYlabel = new VisLabel("StartY: 00");
-    private VisLabel endXlabel = new VisLabel("EndX: 00");
-    private VisLabel endYlabel = new VisLabel("EndY: 00");
+    private VisLabel topLeft = new VisLabel("StartX: 00");
+    private VisLabel bottomLeft = new VisLabel("StartY: 00");
+    private VisLabel topRight = new VisLabel("EndX: 00");
+    private VisLabel bottomRight = new VisLabel("EndY: 00");
 
     @Override
     public Actor build(StageHandler stageHandler) {
 
         // Start
-        VisTable startXtable = new VisTable();
-        startXtable.add(startXlabel);
-        startXtable.setPosition(StageHandler.EDGE_PADDING, Gdx.graphics.getHeight() - StageHandler.PADDING);
-        stageHandler.getStage().addActor(startXtable);
+        VisTable topLeftTable = new VisTable();
+        topLeftTable.add(topLeft);
+        topLeftTable.setPosition(StageHandler.EDGE_PADDING, Gdx.graphics.getHeight() - StageHandler.PADDING);
+        stageHandler.getStage().addActor(topLeftTable);
 
-        VisTable startYtable = new VisTable();
-        startYtable.add(startYlabel);
-        startYtable.setPosition(StageHandler.EDGE_PADDING, StageHandler.PADDING);
-        stageHandler.getStage().addActor(startYtable);
+        VisTable bottomLeftTable = new VisTable();
+        bottomLeftTable.add(bottomLeft);
+        bottomLeftTable.setPosition(StageHandler.EDGE_PADDING, StageHandler.PADDING);
+        stageHandler.getStage().addActor(bottomLeftTable);
 
         // End
-        VisTable endXtable = new VisTable();
-        endXtable.add(endXlabel);
-        endXtable.setPosition(Gdx.graphics.getWidth() - StageHandler.EDGE_PADDING, StageHandler.PADDING);
-        stageHandler.getStage().addActor(endXtable);
+        VisTable topRightTable = new VisTable();
+        topRightTable.add(topRight);
+        topRightTable.setPosition(Gdx.graphics.getWidth() - StageHandler.EDGE_PADDING, Gdx.graphics.getHeight() - StageHandler.PADDING);
+        stageHandler.getStage().addActor(topRightTable);
 
-        VisTable endYtable = new VisTable();
-        endYtable.add(endYlabel);
-        endYtable.setPosition(Gdx.graphics.getWidth() - StageHandler.EDGE_PADDING, Gdx.graphics.getHeight() - StageHandler.PADDING);
-        stageHandler.getStage().addActor(endYtable);
+        VisTable bottomRightTable = new VisTable();
+        bottomRightTable.add(bottomRight);
+        bottomRightTable.setPosition(Gdx.graphics.getWidth() - StageHandler.EDGE_PADDING, StageHandler.PADDING);
+        stageHandler.getStage().addActor(bottomRightTable);
 
         return this;
     }
 
     @Override
     public void update(IsometricTest isometricTest) {
-        int x = (int) isometricTest.getMouse().getCellHovered().x;
-        int y = (int) isometricTest.getMouse().getCellHovered().y;
-        startXlabel.setText("StartX: " + isometricTest.getMapRenderer().getCol1() + " (" + x + ")");
-        startYlabel.setText("StartY: " + isometricTest.getMapRenderer().getRow1() + " (" + y + ")");
-        endXlabel.setText("EndX: " + isometricTest.getMapRenderer().getCol2() + " (" + x + ")");
-        endYlabel.setText("EndY: " + isometricTest.getMapRenderer().getRow2() + " (" + y + ")");
+        int rotation = isometricTest.getMapRotation();
+        int mouseTileX = (int) isometricTest.getMouse().getCellHovered().x;
+        int mouseTileY = (int) isometricTest.getMouse().getCellHovered().y;
+
+        String startX = "StartX: " + isometricTest.getMapRenderer().getCol1() + " (" + mouseTileX + ")";
+        String startY = "StartY: " + isometricTest.getMapRenderer().getRow1() + " (" + mouseTileY + ")";
+        String endX = "EndX: " + isometricTest.getMapRenderer().getCol2() + " (" + mouseTileX + ")";
+        String endY = "EndY: " + isometricTest.getMapRenderer().getRow2() + " (" + mouseTileY + ")";
+
+        if (rotation == 0) {
+            topLeft.setText(startX);
+            bottomLeft.setText(startY);
+            topRight.setText(endY);
+            bottomRight.setText(endX);
+        } else if (rotation == 1) {
+            topLeft.setText(endY);
+            bottomLeft.setText(startX);
+            topRight.setText(endX);
+            bottomRight.setText(startY);
+        } else if (rotation == 2) {
+            topLeft.setText(endX);
+            bottomLeft.setText(endY);
+            topRight.setText(startY);
+            bottomRight.setText(startX);
+        } else if (rotation == 3) {
+            topLeft.setText(startY);
+            bottomLeft.setText(endX);
+            topRight.setText(startX);
+            bottomRight.setText(endY);
+        }
     }
 }

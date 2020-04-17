@@ -1,6 +1,7 @@
 package com.forgestorm.isometric;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -35,6 +36,7 @@ import static com.badlogic.gdx.graphics.g2d.Batch.Y2;
 import static com.badlogic.gdx.graphics.g2d.Batch.Y3;
 import static com.badlogic.gdx.graphics.g2d.Batch.Y4;
 
+@Getter
 public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
     private IsometricTest isometricTest;
@@ -67,6 +69,18 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         invIsoTransform.inv();
     }
 
+    @Override
+    public void setView(OrthographicCamera camera) {
+        batch.setProjectionMatrix(camera.combined);
+//        float width = camera.viewportWidth * camera.zoom;
+//        float height = camera.viewportHeight * camera.zoom;
+        float width = camera.viewportWidth;
+        float height = camera.viewportHeight;
+        float w = width * Math.abs(camera.up.y) + height * Math.abs(camera.up.x);
+        float h = height * Math.abs(camera.up.y) + width * Math.abs(camera.up.x);
+        viewBounds.set(camera.position.x - w / 2, camera.position.y - h / 2, w, h);
+    }
+
     private Vector3 translateScreenToIso(Vector2 vec) {
         screenPos.set(vec.x, vec.y, 0);
         screenPos.mul(invIsoTransform);
@@ -75,7 +89,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     }
 
     @Getter
-    private int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
+    private int startY = 0, endY = 0, startX = 0, endX = 0;
 
     @Override
     public void renderTileLayer(TiledMapTileLayer layer) {
@@ -88,14 +102,9 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         // offset in tiled is y down, so we flip it
         final float layerOffsetY = -layer.getRenderOffsetY() * unitScale;
 
-        System.out.println("Offset x: " + layerOffsetX + ", Offset y: " + layerOffsetY);
-        System.out.println("VB x: " + viewBounds.x + ", VB y: " + viewBounds.y);
-        System.out.println("VB width: " + viewBounds.width + ", VB height: " + viewBounds.height);
-
-        int rotation = isometricTest.getMapRotation();
+        int mapRotation = isometricTest.getMapRotation();
 
         // setting up the screen points
-
         // COL2
         // Top Left
         float x2 = viewBounds.x - layerOffsetX;
@@ -120,22 +129,26 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         float y1 = viewBounds.y - layerOffsetY;
         topRight.set(x1, y1);
 
-        System.out.println("-[ ViewBounds ]---------------------------");
+        // transforming screen coordinates to iso coordinates
+        startX = (int) (translateScreenToIso(bottomLeft).x / tileWidth); // -2
+        endX = (int) (translateScreenToIso(topRight).x / tileWidth); // +2
+
+        startY = (int) (translateScreenToIso(topLeft).y / tileWidth); // -2
+        endY = (int) (translateScreenToIso(bottomRight).y / tileWidth); // +2
+
+        System.out.println("-[ ViewBounds | Rotation: " + mapRotation + " ]-------------------");
+        System.out.println("Offset x: " + layerOffsetX + ", Offset y: " + layerOffsetY);
+        System.out.println("VB x: " + viewBounds.x + ", VB y: " + viewBounds.y);
+        System.out.println("VB width: " + viewBounds.width + ", VB height: " + viewBounds.height);
+        System.out.println();
         System.out.println("TopLeft: " + topLeft.toString());
         System.out.println("BottomLeft: " + bottomLeft.toString());
         System.out.println("TopRight: " + topRight.toString());
         System.out.println("BottomRight: " + bottomRight.toString());
-        System.out.println("-------------------------------------");
-
-        // transforming screen coordinates to iso coordinates
-        col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth); // -2
-        col2 = (int) (translateScreenToIso(topRight).x / tileWidth); // +2
-
-        row1 = (int) (translateScreenToIso(topLeft).y / tileWidth); // -2
-        row2 = (int) (translateScreenToIso(bottomRight).y / tileWidth); // +2
-
-        System.out.println("StartX: " + col1 + ", EndX: " + col2);
-        System.out.println("StartY: " + row1 + ", EndY: " + row2);
+        System.out.println();
+        System.out.println("StartX: " + startX + ", EndX: " + endX);
+        System.out.println("StartY: " + startY + ", EndY: " + endY);
+        System.out.println("----------------------------------------------------------");
 
         int cameraCenterX = (int) isometricTest.getMouse().getCellClicked().x;
         int cameraCenterY = (int) isometricTest.getMouse().getCellClicked().y;
@@ -143,13 +156,37 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
         // bottomLeft -cameraPosition*rotation
 
+        // StartX and StartY numbers are lower in value than EndX and EndY
+
         // Draw only visible columns and rows
-        for (int row = row2; row >= row1; row--) {
-            for (int col = col1; col <= col2; col++) {
-                Vector2 tempVector = IsometricUtil.isometricProjection(col, row, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), rotation);
-                renderRotation(layer, color, col, row, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+        int tilesRendered = 0;
+        if (mapRotation == 0) {
+            for (int y = endY; y >= startY; y--) {
+                for (int x = startX; x <= endX; x++) {
+                    Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
+                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    tilesRendered++;
+                }
+            }
+        } else if (mapRotation == 2) {
+            for (int y = startY; y <= endY; y++) {
+                for (int x = endX; x >= startX; x--) {
+                    Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
+                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    tilesRendered++;
+                }
+            }
+        } else {
+            // Rotation 1 and 3
+            for (int y = endY; y >= startY; y--) {
+                for (int x = startX; x <= endX; x++) {
+                    Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
+                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    tilesRendered++;
+                }
             }
         }
+        System.out.println("TilesRendered: " + tilesRendered);
     }
 
     private void renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {

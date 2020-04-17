@@ -51,10 +51,10 @@ public class EdgeDescriptors extends Actor implements Buildable, Updatable {
         int mouseTileX = (int) isometricTest.getMouse().getCellHovered().x;
         int mouseTileY = (int) isometricTest.getMouse().getCellHovered().y;
 
-        String startX = "StartX: " + isometricTest.getMapRenderer().getCol1() + " (" + mouseTileX + ")";
-        String startY = "StartY: " + isometricTest.getMapRenderer().getRow1() + " (" + mouseTileY + ")";
-        String endX = "EndX: " + isometricTest.getMapRenderer().getCol2() + " (" + mouseTileX + ")";
-        String endY = "EndY: " + isometricTest.getMapRenderer().getRow2() + " (" + mouseTileY + ")";
+        String startX = "StartX: " + isometricTest.getMapRenderer().getStartX() + " (" + mouseTileX + ")";
+        String startY = "StartY: " + isometricTest.getMapRenderer().getStartY() + " (" + mouseTileY + ")";
+        String endX = "EndX: " + isometricTest.getMapRenderer().getEndX() + " (" + mouseTileX + ")";
+        String endY = "EndY: " + isometricTest.getMapRenderer().getEndY() + " (" + mouseTileY + ")";
 
         if (rotation == 0) {
             topLeft.setText(startX);

@@ -27,6 +27,9 @@ public class Keyboard implements InputProcessor {
         if (keycode == Input.Keys.A || keycode == Input.Keys.LEFT) camera.position.x += 10;
         if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x -= 10;
 
+        // Reset Drawn Tiles
+        if (keycode == Input.Keys.DEL) isometricTest.getObjectList().clear();
+
         // Rotate Map
         if (keycode == Input.Keys.NUMPAD_0) {
             isometricTest.setMapRotation(0);

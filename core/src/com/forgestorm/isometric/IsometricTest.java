@@ -8,10 +8,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapProperties;
-import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.input.Keyboard;
 import com.forgestorm.isometric.input.Mouse;
@@ -58,6 +59,8 @@ public class IsometricTest extends ApplicationAdapter {
     private Mouse mouse;
 
     private StageHandler stageHandler;
+
+    private ShapeRenderer shapeRenderer;
 
     @Override
     public void create() {
@@ -129,6 +132,12 @@ public class IsometricTest extends ApplicationAdapter {
         mapRenderer.setView(camera);
         mapRenderer.render();
 
+        // Viewbounds rectangle
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setAutoShapeType(true);
+
+        // Stop continuous rendering to be able to read console output
+        // Remove when merging with game code
         Gdx.graphics.setContinuousRendering(false);
         Gdx.graphics.requestRendering();
     }
@@ -176,6 +185,16 @@ public class IsometricTest extends ApplicationAdapter {
 
         spriteBatch.end();
 
+        // Draw MapRenderer viewbounds rectangle
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin();
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.line(mapRenderer.getTopLeft(), mapRenderer.getTopRight());
+        shapeRenderer.line(mapRenderer.getBottomLeft(), mapRenderer.getBottomRight());
+        shapeRenderer.line(mapRenderer.getTopLeft(), mapRenderer.getBottomLeft());
+        shapeRenderer.line(mapRenderer.getTopRight(), mapRenderer.getBottomRight());
+        shapeRenderer.end();
+
         stageHandler.update(Gdx.graphics.getDeltaTime(), this);
     }
 
@@ -194,6 +213,7 @@ public class IsometricTest extends ApplicationAdapter {
         stageHandler.dispose();
         tileHoverTexture.dispose();
         for (Texture texture : loadedTextures) texture.dispose();
-        spriteBatch.dispose();
+        spriteBatch.dispose();shapeRenderer = new ShapeRenderer();
+        shapeRenderer.dispose();
     }
 }

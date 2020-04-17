@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.forgestorm.isometric.IsometricTest;
 import com.forgestorm.isometric.scene2d.actors.CenterScreen;
 import com.forgestorm.isometric.scene2d.actors.Debug;
+import com.forgestorm.isometric.scene2d.actors.EdgeDescriptors;
 import com.forgestorm.isometric.scene2d.actors.WorldBuilder;
 import com.kotcrab.vis.ui.VisUI;
 
@@ -19,17 +20,20 @@ public class StageHandler {
     }
 
     public static final int PADDING = 8;
+    public static final int EDGE_PADDING = 60;
 
     private Stage stage = new Stage();
 
     private Debug debug = new Debug();
     private WorldBuilder worldBuilder = new WorldBuilder();
     private CenterScreen centerScreen = new CenterScreen();
+    private EdgeDescriptors edgeDescriptors = new EdgeDescriptors();
 
     public void buildActors() {
         stage.addActor(worldBuilder.build(this));
         stage.addActor(debug.build(this));
         stage.addActor(centerScreen.build(this));
+        stage.addActor(edgeDescriptors.build(this));
     }
 
     public void update(float delta, IsometricTest isometricTest) {

@@ -51,7 +51,7 @@ public class IsometricTest extends ApplicationAdapter {
     private TileComparator tileComparator;
 
     private OrthographicCamera camera;
-    private MapRenderer mapRenderer;
+    private IsometricTileMapRenderer mapRenderer;
     private TiledMap isoMap;
 
     private Keyboard keyboard;
@@ -94,25 +94,22 @@ public class IsometricTest extends ApplicationAdapter {
 
         System.out.println("LoadedTiles: " + loadedTiles + ", TotalTiles: " + totalTiles);
 
-        for (int i = 0; i < mapWidth; i++) {
-            for (int j = 0; j < mapHeight; j++) {
-                objectList.add(new TileObject(new Vector2(i, j), 1));
-            }
-        }
+//        for (int i = 0; i < mapWidth; i++) {
+//            for (int j = 0; j < mapHeight; j++) {
+//                objectList.add(new TileObject(new Vector2(i, j), 1));
+//            }
+//        }
 
         // Camera Setup
         camera = new OrthographicCamera(ScreenResolutions.DESKTOP_800_600.getWidth(), ScreenResolutions.DESKTOP_800_600.getHeight());
 
         // Set camera to map origin x0, y0.
         Vector2 tempVector = IsometricUtil.isometricProjection(0, 0, tileWidthHalf, tileHeightHalf, mapRotation);
-        camera.position.x = tempVector.x;
-        camera.position.y = tempVector.y;
+        camera.position.x = tempVector.x + tileWidthHalf;
+        camera.position.y = tempVector.y + tileHeightHalf;
         camera.update();
 
-        // Map renderer
-        mapRenderer = new IsometricTileMapRenderer(this, isoMap, spriteBatch);
-        mapRenderer.setView(camera);
-        mapRenderer.render();
+
 
         // User Interface
         stageHandler = new StageHandler();
@@ -126,6 +123,14 @@ public class IsometricTest extends ApplicationAdapter {
         inputMultiplexer.addProcessor(keyboard);
         inputMultiplexer.addProcessor(mouse);
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+        // Map renderer
+        mapRenderer = new IsometricTileMapRenderer(this, isoMap, spriteBatch);
+        mapRenderer.setView(camera);
+        mapRenderer.render();
+
+        Gdx.graphics.setContinuousRendering(false);
+        Gdx.graphics.requestRendering();
     }
 
     private Vector2 tempVector;
@@ -139,8 +144,8 @@ public class IsometricTest extends ApplicationAdapter {
         if (sortNeeded) {
             if (mouse.getCellClicked() != null) {
                 Vector2 tempVector = IsometricUtil.isometricProjection(mouse.getCellClicked().x, mouse.getCellClicked().y, tileWidthHalf, tileHeightHalf, mapRotation);
-                camera.position.x = tempVector.x;
-                camera.position.y = tempVector.y;
+                camera.position.x = tempVector.x + tileWidthHalf;
+                camera.position.y = tempVector.y + tileHeightHalf;
             }
         }
 
@@ -165,7 +170,7 @@ public class IsometricTest extends ApplicationAdapter {
 
         // Draw mouse wireframe
         if (mouse.getCellHovered() != null) {
-            tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, true);
+            tempVector = IsometricUtil.screenToMap(mouse.getCellHovered().x, mouse.getCellHovered().y, mapWidth, mapHeight, tileWidthHalf, tileHeightHalf, mapRotation, false);
             spriteBatch.draw(tileHoverTexture, tempVector.x, tempVector.y);
         }
 

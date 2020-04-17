@@ -3,13 +3,16 @@ package com.forgestorm.isometric.input;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.forgestorm.isometric.IsometricTest;
-import com.forgestorm.isometric.util.IsometricUtil;
+import com.kotcrab.vis.ui.VisUI;
 
 public class Keyboard implements InputProcessor {
 
     private IsometricTest isometricTest;
     private OrthographicCamera camera;
+    private boolean userInterfaceDebug = false;
 
     public Keyboard(IsometricTest isometricTest, OrthographicCamera camera) {
         this.isometricTest = isometricTest;
@@ -40,6 +43,16 @@ public class Keyboard implements InputProcessor {
         if (keycode == Input.Keys.NUMPAD_3) {
             isometricTest.setMapRotation(3);
             isometricTest.setSortNeeded(true);
+        }
+
+        if (keycode == Input.Keys.F12) {
+            userInterfaceDebug = !userInterfaceDebug;
+            for (Actor actor : isometricTest.getStageHandler().getStage().getActors()) {
+                if (actor instanceof Group) {
+                    Group group = (Group) actor;
+                    group.setDebug(userInterfaceDebug, true);
+                }
+            }
         }
         return true;
     }

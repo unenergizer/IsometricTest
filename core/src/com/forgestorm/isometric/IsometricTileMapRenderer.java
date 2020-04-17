@@ -6,12 +6,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.forgestorm.isometric.util.IsometricUtil;
+
+import lombok.Getter;
 
 import static com.badlogic.gdx.graphics.g2d.Batch.C1;
 import static com.badlogic.gdx.graphics.g2d.Batch.C2;
@@ -73,6 +74,9 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         return screenPos;
     }
 
+    @Getter
+    private int row1 = 0, row2 = 0, col1 = 0, col2 = 0;
+
     @Override
     public void renderTileLayer(TiledMapTileLayer layer) {
         final Color batchColor = batch.getColor();
@@ -84,25 +88,62 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         // offset in tiled is y down, so we flip it
         final float layerOffsetY = -layer.getRenderOffsetY() * unitScale;
 
-        // setting up the screen points
-        // COL1
-        topRight.set(viewBounds.x + viewBounds.width - layerOffsetX, viewBounds.y - layerOffsetY);
-        // COL2
-        bottomLeft.set(viewBounds.x - layerOffsetX, viewBounds.y + viewBounds.height - layerOffsetY);
-        // ROW1
-        topLeft.set(viewBounds.x - layerOffsetX, viewBounds.y - layerOffsetY);
-        // ROW2
-        bottomRight.set(viewBounds.x + viewBounds.width - layerOffsetX, viewBounds.y + viewBounds.height - layerOffsetY);
-
-        // transforming screen coordinates to iso coordinates
-        int row1 = (int) (translateScreenToIso(topLeft).y / tileWidth);
-        int row2 = (int) (translateScreenToIso(bottomRight).y / tileWidth);
-
-        int col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth);
-        int col2 = (int) (translateScreenToIso(topRight).x / tileWidth);
+        System.out.println("Offset x: " + layerOffsetX + ", Offset y: " + layerOffsetY);
+        System.out.println("VB x: " + viewBounds.x + ", VB y: " + viewBounds.y);
+        System.out.println("VB width: " + viewBounds.width + ", VB height: " + viewBounds.height);
 
         int rotation = isometricTest.getMapRotation();
 
+        // setting up the screen points
+
+        // COL2
+        // Top Left
+        float x2 = viewBounds.x - layerOffsetX;
+        float y2 = viewBounds.y + viewBounds.height - layerOffsetY;
+        bottomLeft.set(x2, y2);
+
+        // ROW1
+        // Bottom Left
+        float x3 = viewBounds.x - layerOffsetX;
+        float y3 = viewBounds.y - layerOffsetY;
+        topLeft.set(x3, y3);
+
+        // ROW2
+        // Top Right
+        float x4 = viewBounds.x + viewBounds.width - layerOffsetX;
+        float y4 = viewBounds.y + viewBounds.height - layerOffsetY;
+        bottomRight.set(x4, y4);
+
+        // COL1
+        // Bottom Right
+        float x1 = viewBounds.x + viewBounds.width - layerOffsetX;
+        float y1 = viewBounds.y - layerOffsetY;
+        topRight.set(x1, y1);
+
+        System.out.println("-[ ViewBounds ]---------------------------");
+        System.out.println("TopLeft: " + topLeft.toString());
+        System.out.println("BottomLeft: " + bottomLeft.toString());
+        System.out.println("TopRight: " + topRight.toString());
+        System.out.println("BottomRight: " + bottomRight.toString());
+        System.out.println("-------------------------------------");
+
+        // transforming screen coordinates to iso coordinates
+        col1 = (int) (translateScreenToIso(bottomLeft).x / tileWidth); // -2
+        col2 = (int) (translateScreenToIso(topRight).x / tileWidth); // +2
+
+        row1 = (int) (translateScreenToIso(topLeft).y / tileWidth); // -2
+        row2 = (int) (translateScreenToIso(bottomRight).y / tileWidth); // +2
+
+        System.out.println("StartX: " + col1 + ", EndX: " + col2);
+        System.out.println("StartY: " + row1 + ", EndY: " + row2);
+
+        int cameraCenterX = (int) isometricTest.getMouse().getCellClicked().x;
+        int cameraCenterY = (int) isometricTest.getMouse().getCellClicked().y;
+
+
+        // bottomLeft -cameraPosition*rotation
+
+        // Draw only visible columns and rows
         for (int row = row2; row >= row1; row--) {
             for (int col = col1; col <= col2; col++) {
                 Vector2 tempVector = IsometricUtil.isometricProjection(col, row, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), rotation);
@@ -173,53 +214,53 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 vertices[V2] = vertices[V4];
                 vertices[V4] = temp;
             }
-            if (rotations != 0) {
-                switch (rotations) {
-                    case Cell.ROTATE_90: {
-                        float tempV = vertices[V1];
-                        vertices[V1] = vertices[V2];
-                        vertices[V2] = vertices[V3];
-                        vertices[V3] = vertices[V4];
-                        vertices[V4] = tempV;
-
-                        float tempU = vertices[U1];
-                        vertices[U1] = vertices[U2];
-                        vertices[U2] = vertices[U3];
-                        vertices[U3] = vertices[U4];
-                        vertices[U4] = tempU;
-                        break;
-                    }
-                    case Cell.ROTATE_180: {
-                        float tempU = vertices[U1];
-                        vertices[U1] = vertices[U3];
-                        vertices[U3] = tempU;
-                        tempU = vertices[U2];
-                        vertices[U2] = vertices[U4];
-                        vertices[U4] = tempU;
-                        float tempV = vertices[V1];
-                        vertices[V1] = vertices[V3];
-                        vertices[V3] = tempV;
-                        tempV = vertices[V2];
-                        vertices[V2] = vertices[V4];
-                        vertices[V4] = tempV;
-                        break;
-                    }
-                    case Cell.ROTATE_270: {
-                        float tempV = vertices[V1];
-                        vertices[V1] = vertices[V4];
-                        vertices[V4] = vertices[V3];
-                        vertices[V3] = vertices[V2];
-                        vertices[V2] = tempV;
-
-                        float tempU = vertices[U1];
-                        vertices[U1] = vertices[U4];
-                        vertices[U4] = vertices[U3];
-                        vertices[U3] = vertices[U2];
-                        vertices[U2] = tempU;
-                        break;
-                    }
-                }
-            }
+//            if (rotations != 0) {
+//                switch (rotations) {
+//                    case Cell.ROTATE_90: {
+//                        float tempV = vertices[V1];
+//                        vertices[V1] = vertices[V2];
+//                        vertices[V2] = vertices[V3];
+//                        vertices[V3] = vertices[V4];
+//                        vertices[V4] = tempV;
+//
+//                        float tempU = vertices[U1];
+//                        vertices[U1] = vertices[U2];
+//                        vertices[U2] = vertices[U3];
+//                        vertices[U3] = vertices[U4];
+//                        vertices[U4] = tempU;
+//                        break;
+//                    }
+//                    case Cell.ROTATE_180: {
+//                        float tempU = vertices[U1];
+//                        vertices[U1] = vertices[U3];
+//                        vertices[U3] = tempU;
+//                        tempU = vertices[U2];
+//                        vertices[U2] = vertices[U4];
+//                        vertices[U4] = tempU;
+//                        float tempV = vertices[V1];
+//                        vertices[V1] = vertices[V3];
+//                        vertices[V3] = tempV;
+//                        tempV = vertices[V2];
+//                        vertices[V2] = vertices[V4];
+//                        vertices[V4] = tempV;
+//                        break;
+//                    }
+//                    case Cell.ROTATE_270: {
+//                        float tempV = vertices[V1];
+//                        vertices[V1] = vertices[V4];
+//                        vertices[V4] = vertices[V3];
+//                        vertices[V3] = vertices[V2];
+//                        vertices[V2] = tempV;
+//
+//                        float tempU = vertices[U1];
+//                        vertices[U1] = vertices[U4];
+//                        vertices[U4] = vertices[U3];
+//                        vertices[U3] = vertices[U2];
+//                        vertices[U2] = tempU;
+//                        break;
+//                    }
+//                }
+//            }
             batch.draw(region.getTexture(), vertices, 0, NUM_VERTICES);
         }
     }

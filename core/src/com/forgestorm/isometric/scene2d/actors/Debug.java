@@ -30,7 +30,7 @@ public class Debug extends VisTable implements Buildable, Updatable {
         add(fpsLabel).align(Alignment.LEFT.getAlignment()).row();
         add(rotationLabel).align(Alignment.LEFT.getAlignment()).row();
         pack();
-        setPosition(StageHandler.PADDING, Gdx.graphics.getHeight() - StageHandler.PADDING - getHeight());
+        setPosition(StageHandler.PADDING, (Gdx.graphics.getHeight() - getHeight()) / 2);
         return this;
     }
 

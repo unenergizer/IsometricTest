@@ -29,8 +29,8 @@ public class Mouse implements InputProcessor {
     private int mouseY;
 
     private TiledMapTile tileClicked;
-    private Vector2 cellClicked;
-    private Vector2 cellHovered;
+    private Vector2 cellClicked = new Vector2(0, 0);
+    private Vector2 cellHovered = new Vector2(0, 0);
 
     public Mouse(IsometricTest isometricTest) {
         this.isometricTest = isometricTest;
@@ -44,8 +44,8 @@ public class Mouse implements InputProcessor {
 
         // Center camera on Tile Click location
         Vector2 tempVector = IsometricUtil.isometricProjection(cellClicked.x, cellClicked.y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
-        camera.position.x = tempVector.x;
-        camera.position.y = tempVector.y;
+        camera.position.x = tempVector.x + isometricTest.getTileWidthHalf();
+        camera.position.y = tempVector.y + isometricTest.getTileHeightHalf();
 
         if (!IsometricUtil.isOutOfBounds(cellClicked.x, cellClicked.y, isometricTest.getMapWidth(), isometricTest.getMapHeight(), isometricTest.getMapRotation())) {
             wallPlace(cellClicked.x, cellClicked.y, button);

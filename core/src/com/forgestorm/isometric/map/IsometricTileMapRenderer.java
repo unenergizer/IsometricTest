@@ -147,7 +147,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         System.out.println();
         System.out.println("StartX: " + startX + ", EndX: " + endX);
         System.out.println("StartY: " + startY + ", EndY: " + endY);
-        System.out.println("----------------------------------------------------------");
 
         // Draw only visible columns and rows
         int tilesRendered = 0;
@@ -169,7 +168,9 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 }
             }
         }
+        System.out.println();
         System.out.println("TilesRendered: " + tilesRendered);
+        System.out.println("----------------------------------------------------------");
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -1,4 +1,4 @@
-package com.forgestorm.isometric;
+package com.forgestorm.isometric.map;
 
 import com.badlogic.gdx.math.Vector2;
 

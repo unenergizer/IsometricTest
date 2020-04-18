@@ -1,6 +1,7 @@
-package com.forgestorm.isometric;
+package com.forgestorm.isometric.map;
 
 import com.badlogic.gdx.math.Vector2;
+import com.forgestorm.isometric.IsometricTest;
 
 import java.util.Comparator;
 
@@ -8,7 +9,7 @@ public class TileComparator implements Comparator<TileObject> {
 
     private final IsometricTest isometricTest;
 
-    TileComparator(IsometricTest isometricTest) {
+    public TileComparator(IsometricTest isometricTest) {
         this.isometricTest = isometricTest;
     }
 

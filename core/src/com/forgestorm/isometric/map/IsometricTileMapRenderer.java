@@ -1,4 +1,4 @@
-package com.forgestorm.isometric;
+package com.forgestorm.isometric.map;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.renderers.BatchTiledMapRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.forgestorm.isometric.IsometricTest;
 import com.forgestorm.isometric.util.IsometricUtil;
 
 import lombok.Getter;
@@ -49,7 +50,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     private Vector2 topLeft = new Vector2();
     private Vector2 bottomRight = new Vector2();
 
-    IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map, Batch batch) {
+    public IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map, Batch batch) {
         super(map, batch);
         init();
         this.isometricTest = isometricTest;
@@ -72,6 +73,8 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     @Override
     public void setView(OrthographicCamera camera) {
         batch.setProjectionMatrix(camera.combined);
+        // Temporarily removed to calculate viewbounds regarldess of zoom level. For debugging.
+        // When code is ready, uncomment this line and delete the two underneath.
 //        float width = camera.viewportWidth * camera.zoom;
 //        float height = camera.viewportHeight * camera.zoom;
         float width = camera.viewportWidth;
@@ -104,32 +107,28 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
         int mapRotation = isometricTest.getMapRotation();
 
-        // setting up the screen points
+        // Setting up the screen points
         // COL2
-        // Top Left
         float x2 = viewBounds.x - layerOffsetX;
         float y2 = viewBounds.y + viewBounds.height - layerOffsetY;
         bottomLeft.set(x2, y2);
 
         // ROW1
-        // Bottom Left
         float x3 = viewBounds.x - layerOffsetX;
         float y3 = viewBounds.y - layerOffsetY;
         topLeft.set(x3, y3);
 
         // ROW2
-        // Top Right
         float x4 = viewBounds.x + viewBounds.width - layerOffsetX;
         float y4 = viewBounds.y + viewBounds.height - layerOffsetY;
         bottomRight.set(x4, y4);
 
         // COL1
-        // Bottom Right
         float x1 = viewBounds.x + viewBounds.width - layerOffsetX;
         float y1 = viewBounds.y - layerOffsetY;
         topRight.set(x1, y1);
 
-        // transforming screen coordinates to iso coordinates
+        // Transforming screen coordinates to iso coordinates
         startX = (int) (translateScreenToIso(bottomLeft).x / tileWidth); // -2
         endX = (int) (translateScreenToIso(topRight).x / tileWidth); // +2
 
@@ -150,17 +149,9 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         System.out.println("StartY: " + startY + ", EndY: " + endY);
         System.out.println("----------------------------------------------------------");
 
-        int cameraCenterX = (int) isometricTest.getMouse().getCellClicked().x;
-        int cameraCenterY = (int) isometricTest.getMouse().getCellClicked().y;
-
-
-        // bottomLeft -cameraPosition*rotation
-
-        // StartX and StartY numbers are lower in value than EndX and EndY
-
         // Draw only visible columns and rows
         int tilesRendered = 0;
-        if (mapRotation == 0) {
+        if (mapRotation == 0 | mapRotation == 1 | mapRotation == 3) {
             for (int y = endY; y >= startY; y--) {
                 for (int x = startX; x <= endX; x++) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
@@ -169,17 +160,9 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 }
             }
         } else if (mapRotation == 2) {
+            // Mirror map rotation 0 for drawing tile order
             for (int y = startY; y <= endY; y++) {
                 for (int x = endX; x >= startX; x--) {
-                    Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
-                    tilesRendered++;
-                }
-            }
-        } else {
-            // Rotation 1 and 3
-            for (int y = endY; y >= startY; y--) {
-                for (int x = startX; x <= endX; x++) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
                     renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
                     tilesRendered++;
@@ -189,6 +172,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
         System.out.println("TilesRendered: " + tilesRendered);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {
         final TiledMapTileLayer.Cell cell = layer.getCell(col, row);
         if (cell == null) return;
@@ -251,53 +235,53 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 vertices[V2] = vertices[V4];
                 vertices[V4] = temp;
             }
-//            if (rotations != 0) {
-//                switch (rotations) {
-//                    case Cell.ROTATE_90: {
-//                        float tempV = vertices[V1];
-//                        vertices[V1] = vertices[V2];
-//                        vertices[V2] = vertices[V3];
-//                        vertices[V3] = vertices[V4];
-//                        vertices[V4] = tempV;
-//
-//                        float tempU = vertices[U1];
-//                        vertices[U1] = vertices[U2];
-//                        vertices[U2] = vertices[U3];
-//                        vertices[U3] = vertices[U4];
-//                        vertices[U4] = tempU;
-//                        break;
-//                    }
-//                    case Cell.ROTATE_180: {
-//                        float tempU = vertices[U1];
-//                        vertices[U1] = vertices[U3];
-//                        vertices[U3] = tempU;
-//                        tempU = vertices[U2];
-//                        vertices[U2] = vertices[U4];
-//                        vertices[U4] = tempU;
-//                        float tempV = vertices[V1];
-//                        vertices[V1] = vertices[V3];
-//                        vertices[V3] = tempV;
-//                        tempV = vertices[V2];
-//                        vertices[V2] = vertices[V4];
-//                        vertices[V4] = tempV;
-//                        break;
-//                    }
-//                    case Cell.ROTATE_270: {
-//                        float tempV = vertices[V1];
-//                        vertices[V1] = vertices[V4];
-//                        vertices[V4] = vertices[V3];
-//                        vertices[V3] = vertices[V2];
-//                        vertices[V2] = tempV;
-//
-//                        float tempU = vertices[U1];
-//                        vertices[U1] = vertices[U4];
-//                        vertices[U4] = vertices[U3];
-//                        vertices[U3] = vertices[U2];
-//                        vertices[U2] = tempU;
-//                        break;
-//                    }
-//                }
-//            }
+            if (rotations != 0) {
+                switch (rotations) {
+                    case TiledMapTileLayer.Cell.ROTATE_90: {
+                        float tempV = vertices[V1];
+                        vertices[V1] = vertices[V2];
+                        vertices[V2] = vertices[V3];
+                        vertices[V3] = vertices[V4];
+                        vertices[V4] = tempV;
+
+                        float tempU = vertices[U1];
+                        vertices[U1] = vertices[U2];
+                        vertices[U2] = vertices[U3];
+                        vertices[U3] = vertices[U4];
+                        vertices[U4] = tempU;
+                        break;
+                    }
+                    case TiledMapTileLayer.Cell.ROTATE_180: {
+                        float tempU = vertices[U1];
+                        vertices[U1] = vertices[U3];
+                        vertices[U3] = tempU;
+                        tempU = vertices[U2];
+                        vertices[U2] = vertices[U4];
+                        vertices[U4] = tempU;
+                        float tempV = vertices[V1];
+                        vertices[V1] = vertices[V3];
+                        vertices[V3] = tempV;
+                        tempV = vertices[V2];
+                        vertices[V2] = vertices[V4];
+                        vertices[V4] = tempV;
+                        break;
+                    }
+                    case TiledMapTileLayer.Cell.ROTATE_270: {
+                        float tempV = vertices[V1];
+                        vertices[V1] = vertices[V4];
+                        vertices[V4] = vertices[V3];
+                        vertices[V3] = vertices[V2];
+                        vertices[V2] = tempV;
+
+                        float tempU = vertices[U1];
+                        vertices[U1] = vertices[U4];
+                        vertices[U4] = vertices[U3];
+                        vertices[U3] = vertices[U2];
+                        vertices[U2] = tempU;
+                        break;
+                    }
+                }
+            }
             batch.draw(region.getTexture(), vertices, 0, NUM_VERTICES);
         }
     }

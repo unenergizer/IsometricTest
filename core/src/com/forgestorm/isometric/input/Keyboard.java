@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.forgestorm.isometric.IsometricTest;
-import com.kotcrab.vis.ui.VisUI;
 
 public class Keyboard implements InputProcessor {
 
@@ -22,10 +21,10 @@ public class Keyboard implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         // Move Camera
-        if (keycode == Input.Keys.W || keycode == Input.Keys.UP) camera.position.y -= 10;
-        if (keycode == Input.Keys.S || keycode == Input.Keys.DOWN) camera.position.y += 10;
-        if (keycode == Input.Keys.A || keycode == Input.Keys.LEFT) camera.position.x += 10;
-        if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x -= 10;
+        if (keycode == Input.Keys.W || keycode == Input.Keys.UP) camera.position.y += 8;
+        if (keycode == Input.Keys.S || keycode == Input.Keys.DOWN) camera.position.y -= 8;
+        if (keycode == Input.Keys.A || keycode == Input.Keys.LEFT) camera.position.x -= 16;
+        if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x += 16;
 
         // Reset Drawn Tiles
         if (keycode == Input.Keys.DEL) isometricTest.getObjectList().clear();

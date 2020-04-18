@@ -12,13 +12,16 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.input.Keyboard;
 import com.forgestorm.isometric.input.Mouse;
+import com.forgestorm.isometric.map.IsometricTileMapRenderer;
+import com.forgestorm.isometric.map.TileComparator;
+import com.forgestorm.isometric.map.TileObject;
 import com.forgestorm.isometric.scene2d.StageHandler;
 import com.forgestorm.isometric.util.IsometricUtil;
 import com.forgestorm.isometric.util.ScreenResolutions;
+import com.forgestorm.isometric.util.BetterCameraZoom;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,8 +113,8 @@ public class IsometricTest extends ApplicationAdapter {
         Vector2 tempVector = IsometricUtil.isometricProjection(0, 0, tileWidthHalf, tileHeightHalf, mapRotation);
         camera.position.x = tempVector.x + tileWidthHalf;
         camera.position.y = tempVector.y + tileHeightHalf;
+        camera.zoom = BetterCameraZoom.getDefaultZoom().getZoomValue();
         camera.update();
-
 
 
         // User Interface
@@ -213,7 +216,8 @@ public class IsometricTest extends ApplicationAdapter {
         stageHandler.dispose();
         tileHoverTexture.dispose();
         for (Texture texture : loadedTextures) texture.dispose();
-        spriteBatch.dispose();shapeRenderer = new ShapeRenderer();
+        spriteBatch.dispose();
+        shapeRenderer = new ShapeRenderer();
         shapeRenderer.dispose();
     }
 }

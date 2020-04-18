@@ -7,9 +7,10 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.IsometricTest;
-import com.forgestorm.isometric.TileObject;
+import com.forgestorm.isometric.map.TileObject;
 import com.forgestorm.isometric.util.IsometricUtil;
 import com.forgestorm.isometric.util.ScreenResolutions;
+import com.forgestorm.isometric.util.BetterCameraZoom;
 
 import java.util.List;
 
@@ -17,9 +18,6 @@ import lombok.Getter;
 
 @Getter
 public class Mouse implements InputProcessor {
-
-    private static final float ZOOM_MIN = .25f;
-    private static final float ZOOM_MAX = 10f;
 
     private final IsometricTest isometricTest;
     private final OrthographicCamera camera;
@@ -118,16 +116,7 @@ public class Mouse implements InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
-        float change = lastZoom + amount * .25f;
-
-        if (change <= ZOOM_MIN) {
-            change = ZOOM_MIN;
-        } else if (change >= ZOOM_MAX) {
-            change = ZOOM_MAX;
-        }
-
-        lastZoom = change;
-        camera.zoom = lastZoom;
+        camera.zoom = BetterCameraZoom.findNextZoomValue(camera.zoom, amount);
         return true;
     }
 

@@ -8,9 +8,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.forgestorm.isometric.input.Keyboard;
 import com.forgestorm.isometric.input.Mouse;
@@ -61,6 +63,8 @@ public class IsometricTest extends ApplicationAdapter {
     private Mouse mouse;
 
     private StageHandler stageHandler;
+
+    private ShapeRenderer shapeRenderer;
 
     @Override
     public void create() {
@@ -131,6 +135,10 @@ public class IsometricTest extends ApplicationAdapter {
         mapRenderer = new IsometricTileMapRenderer(this, isoMap, spriteBatch);
         mapRenderer.setView(camera);
         mapRenderer.render();
+
+        // Viewbounds rectangle
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setAutoShapeType(true);
     }
 
     private Vector2 tempVector;
@@ -176,6 +184,14 @@ public class IsometricTest extends ApplicationAdapter {
 
         spriteBatch.end();
 
+        // Draw MapRenderer viewbounds rectangle
+        Rectangle viewBounds = mapRenderer.getViewBounds();
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin();
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.rect(viewBounds.x, viewBounds.y, viewBounds.width, viewBounds.height);
+        shapeRenderer.end();
+
         stageHandler.update(Gdx.graphics.getDeltaTime(), this);
     }
 
@@ -195,5 +211,6 @@ public class IsometricTest extends ApplicationAdapter {
         tileHoverTexture.dispose();
         for (Texture texture : loadedTextures) texture.dispose();
         spriteBatch.dispose();
+        shapeRenderer.dispose();
     }
 }

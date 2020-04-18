@@ -67,12 +67,10 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
 
         int cellRenderDistance = (int) (31 * isometricTest.getCamera().zoom);
-
-        // The "-2" and "+2" provides a camera move buffer to outside of the viewbounds.
-        startX = (int) (centerCell.x - cellRenderDistance) - 2;
-        startY = (int) (centerCell.y - cellRenderDistance) - 2;
-        endX = (int) (centerCell.x + cellRenderDistance) + 2;
-        endY = (int) (centerCell.y + cellRenderDistance) + 2;
+        startX = (int) (centerCell.x - cellRenderDistance);
+        startY = (int) (centerCell.y - cellRenderDistance);
+        endX = (int) (centerCell.x + cellRenderDistance);
+        endY = (int) (centerCell.y + cellRenderDistance);
 
         // Reset before each render
         tilesRendered = 0;
@@ -105,6 +103,14 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
 
         final TiledMapTile tile = cell.getTile();
 
+        int bufferX = isometricTest.getTileWidth();
+        int bufferY = isometricTest.getTileWidth();
+
+        // Cull out extra tiles from the view bounds
+        if (x < viewBounds.x - bufferX) return false;
+        if (x > viewBounds.x + viewBounds.width) return false;
+        if (y < viewBounds.y - bufferY) return false;
+        if (y > viewBounds.y + viewBounds.height) return false;
 
         if (tile != null) {
             final boolean flipX = cell.getFlipHorizontally();

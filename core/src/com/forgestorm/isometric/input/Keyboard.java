@@ -27,22 +27,22 @@ public class Keyboard implements InputProcessor {
         if (keycode == Input.Keys.D || keycode == Input.Keys.RIGHT) camera.position.x += 16;
 
         // Reset Drawn Tiles
-        if (keycode == Input.Keys.DEL) isometricTest.getObjectList().clear();
+        if (keycode == Input.Keys.C) isometricTest.getObjectList().clear();
 
         // Rotate Map
-        if (keycode == Input.Keys.NUMPAD_0) {
+        if (keycode == Input.Keys.NUMPAD_0 || keycode == Input.Keys.NUM_0) {
             isometricTest.setMapRotation(0);
             isometricTest.setSortNeeded(true);
         }
-        if (keycode == Input.Keys.NUMPAD_1) {
+        if (keycode == Input.Keys.NUMPAD_1 || keycode == Input.Keys.NUM_1) {
             isometricTest.setMapRotation(1);
             isometricTest.setSortNeeded(true);
         }
-        if (keycode == Input.Keys.NUMPAD_2) {
+        if (keycode == Input.Keys.NUMPAD_2 || keycode == Input.Keys.NUM_2) {
             isometricTest.setMapRotation(2);
             isometricTest.setSortNeeded(true);
         }
-        if (keycode == Input.Keys.NUMPAD_3) {
+        if (keycode == Input.Keys.NUMPAD_3 || keycode == Input.Keys.NUM_3) {
             isometricTest.setMapRotation(3);
             isometricTest.setSortNeeded(true);
         }

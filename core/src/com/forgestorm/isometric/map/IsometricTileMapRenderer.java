@@ -155,8 +155,8 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = endY; y >= startY; y--) {
                 for (int x = startX; x <= endX; x++) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
-                    tilesRendered++;
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    if (tileWasRendered) tilesRendered++;
                 }
             }
         } else if (mapRotation == 2) {
@@ -164,8 +164,8 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = startY; y <= endY; y++) {
                 for (int x = endX; x >= startX; x--) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
-                    tilesRendered++;
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    if (tileWasRendered) tilesRendered++;
                 }
             }
         }
@@ -173,9 +173,10 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {
+    private boolean renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {
         final TiledMapTileLayer.Cell cell = layer.getCell(col, row);
-        if (cell == null) return;
+        if (cell == null) return false;
+
         final TiledMapTile tile = cell.getTile();
 
         if (tile != null) {
@@ -284,5 +285,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             }
             batch.draw(region.getTexture(), vertices, 0, NUM_VERTICES);
         }
+        return true;
     }
 }

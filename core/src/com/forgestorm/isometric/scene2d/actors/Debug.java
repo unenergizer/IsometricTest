@@ -20,6 +20,7 @@ public class Debug extends VisTable implements Buildable, Updatable {
     private VisLabel mapCellLabel = new VisLabel("MapCell: null");
     private VisLabel fpsLabel = new VisLabel("FPS: 1000");
     private VisLabel rotationLabel = new VisLabel("Rotation: 0");
+    private VisLabel tilesRenderedLabel = new VisLabel("TilesRendered: 0");
 
     @Override
     public Actor build(StageHandler stageHandler) {
@@ -29,8 +30,9 @@ public class Debug extends VisTable implements Buildable, Updatable {
         add(mapCellLabel).align(Alignment.LEFT.getAlignment()).row();
         add(fpsLabel).align(Alignment.LEFT.getAlignment()).row();
         add(rotationLabel).align(Alignment.LEFT.getAlignment()).row();
+        add(tilesRenderedLabel).align(Alignment.LEFT.getAlignment()).row();
         pack();
-        setPosition(StageHandler.PADDING, (Gdx.graphics.getHeight() - getHeight()) / 2);
+        setPosition(StageHandler.PADDING, Gdx.graphics.getHeight() - getHeight());
         return this;
     }
 
@@ -49,6 +51,8 @@ public class Debug extends VisTable implements Buildable, Updatable {
 
         int rotation = isometricTest.getMapRotation() * 90;
         rotationLabel.setText("Rotation: " + rotation + ", Num: " + isometricTest.getMapRotation());
+
+        tilesRenderedLabel.setText("TilesRendered: " + isometricTest.getMapRenderer().getTilesRendered());
         pack();
     }
 }

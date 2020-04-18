@@ -38,6 +38,7 @@ public class StageHandler {
 
     public void update(float delta, IsometricTest isometricTest) {
         for (Actor actor : stage.getActors()) {
+            if (!actor.isVisible()) continue;
             if (actor instanceof Updatable) ((Updatable) actor).update(isometricTest);
         }
         stage.act(delta);

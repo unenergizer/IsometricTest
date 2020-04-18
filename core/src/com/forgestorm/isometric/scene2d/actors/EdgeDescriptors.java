@@ -42,6 +42,12 @@ public class EdgeDescriptors extends Actor implements Buildable, Updatable {
         bottomRightTable.setPosition(Gdx.graphics.getWidth() - StageHandler.EDGE_PADDING, StageHandler.PADDING);
         stageHandler.getStage().addActor(bottomRightTable);
 
+        // No need to show this. Enable for debug purposes only
+        topLeftTable.setVisible(false);
+        bottomLeftTable.setVisible(false);
+        topRightTable.setVisible(false);
+        bottomRightTable.setVisible(false);
+        setVisible(false);
         return this;
     }
 

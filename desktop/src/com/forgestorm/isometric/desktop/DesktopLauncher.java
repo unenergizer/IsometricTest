@@ -7,10 +7,11 @@ import com.forgestorm.isometric.util.ScreenResolutions;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
+		ScreenResolutions screenResolution = ScreenResolutions.DESKTOP_1280_720;
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Isometric Demo";
-		config.width = ScreenResolutions.DESKTOP_800_600.getWidth();
-		config.height = ScreenResolutions.DESKTOP_800_600.getHeight();
-		new LwjglApplication(new IsometricTest(), config);
+		config.width = screenResolution.getWidth();
+		config.height = screenResolution.getHeight();
+		new LwjglApplication(new IsometricTest(screenResolution), config);
 	}
 }

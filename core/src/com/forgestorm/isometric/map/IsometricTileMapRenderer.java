@@ -2,6 +2,7 @@ package com.forgestorm.isometric.map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -44,11 +45,30 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     private int endY = 0;
     private int startX = 0;
     private int endX = 0;
+    private int screenRenderDistance;
     private int tilesRendered = 0;
+
 
     public IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map, Batch batch) {
         super(map, batch);
         this.isometricTest = isometricTest;
+        screenRenderDistance = (Gdx.graphics.getWidth() + Gdx.graphics.getHeight()) / (isometricTest.getTileWidth() + isometricTest.getTileHeight());
+        System.out.println("Screen Render Distance: " + screenRenderDistance);
+        System.out.println("Width: " + Gdx.graphics.getWidth() + ", Height: " + Gdx.graphics.getHeight());
+    }
+
+    @Override
+    public void setView(OrthographicCamera camera) {
+        batch.setProjectionMatrix(camera.combined);
+        // Temporarily removed to calculate viewbounds regarldess of zoom level. For debugging.
+        // When code is ready, uncomment this line and delete the two underneath.
+        float width = camera.viewportWidth * camera.zoom;
+        float height = camera.viewportHeight * camera.zoom;
+//        float width = camera.viewportWidth;
+//        float height = camera.viewportHeight;
+        float w = width * Math.abs(camera.up.y) + height * Math.abs(camera.up.x);
+        float h = height * Math.abs(camera.up.y) + width * Math.abs(camera.up.x);
+        viewBounds.set(camera.position.x - w / 2, camera.position.y - h / 2, w, h);
     }
 
     @Override
@@ -66,11 +86,15 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 isometricTest.getCamera(), Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2,
                 isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
 
-        int cellRenderDistance = (int) (31 * isometricTest.getCamera().zoom);
-        startX = (int) (centerCell.x - cellRenderDistance);
-        startY = (int) (centerCell.y - cellRenderDistance);
-        endX = (int) (centerCell.x + cellRenderDistance);
-        endY = (int) (centerCell.y + cellRenderDistance);
+        int renderDistance = (int) (screenRenderDistance * isometricTest.getCamera().zoom) + 4;
+//        int renderDistance = (int) (screenRenderDistance + 4);
+
+        System.out.println("CellRenderDistance: " + renderDistance + ", Zoom: " + isometricTest.getCamera().zoom);
+
+        startX = (int) (centerCell.x - renderDistance);
+        startY = (int) (centerCell.y - renderDistance);
+        endX = (int) (centerCell.x + renderDistance);
+        endY = (int) (centerCell.y + renderDistance);
 
         // Reset before each render
         tilesRendered = 0;
@@ -80,7 +104,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = endY; y >= startY; y--) {
                 for (int x = startX; x <= endX; x++) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY, mapRotation);
                     if (tileWasRendered) tilesRendered++;
                 }
             }
@@ -89,7 +113,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = startY; y <= endY; y++) {
                 for (int x = endX; x >= startX; x--) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY, mapRotation);
                     if (tileWasRendered) tilesRendered++;
                 }
             }
@@ -97,25 +121,24 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private boolean renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {
+    private boolean renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY, int mapRotation) {
         final TiledMapTileLayer.Cell cell = layer.getCell(col, row);
         if (cell == null) return false;
 
         final TiledMapTile tile = cell.getTile();
 
-        int bufferX = isometricTest.getTileWidth();
-        int bufferY = isometricTest.getTileWidth();
-
         // Cull out extra tiles from the view bounds
-        if (x < viewBounds.x - bufferX) return false;
+        if (x < viewBounds.x - isometricTest.getTileWidth()) return false;
         if (x > viewBounds.x + viewBounds.width) return false;
-        if (y < viewBounds.y - bufferY) return false;
-        if (y > viewBounds.y + viewBounds.height) return false;
+        if (y < viewBounds.y - isometricTest.getTileWidth()) return false;
+        if (y > viewBounds.y + viewBounds.height + isometricTest.getTileWidthHalf()) return false;
 
         if (tile != null) {
-            final boolean flipX = cell.getFlipHorizontally();
-            final boolean flipY = cell.getFlipVertically();
-            final int rotations = cell.getRotation();
+            boolean flipX = cell.getFlipHorizontally();
+            boolean flipY = cell.getFlipVertically();
+            int rotations = cell.getRotation();
+//            int rotations = mapRotation;
+
 
             TextureRegion region = tile.getTextureRegion();
 

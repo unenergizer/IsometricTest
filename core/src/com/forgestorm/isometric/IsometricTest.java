@@ -36,6 +36,8 @@ public class IsometricTest extends ApplicationAdapter {
 
     private static final Color BACKGROUND = new Color(23 / 255, 35 / 255, 35 / 255, 1);
 
+    private final ScreenResolutions screenResolution;
+
     private int mapWidth;
     private int mapHeight;
     private int tileWidth;
@@ -66,6 +68,10 @@ public class IsometricTest extends ApplicationAdapter {
 
     private ShapeRenderer shapeRenderer;
 
+    public IsometricTest(ScreenResolutions screenResolution) {
+        this.screenResolution = screenResolution;
+    }
+
     @Override
     public void create() {
 
@@ -84,7 +90,7 @@ public class IsometricTest extends ApplicationAdapter {
         loadedTextures.add(new Texture("images/green_wall2.png"));
 
         // Init map
-        isoMap = new TmxMapLoader().load("map/big-iso-map.tmx");
+        isoMap = new TmxMapLoader().load("map/huge-iso-map.tmx");
         MapProperties isoMapProperties = isoMap.getProperties();
         mapWidth = isoMapProperties.get("width", Integer.class);
         mapHeight = isoMapProperties.get("height", Integer.class);
@@ -108,7 +114,7 @@ public class IsometricTest extends ApplicationAdapter {
 //        }
 
         // Camera Setup
-        camera = new OrthographicCamera(ScreenResolutions.DESKTOP_800_600.getWidth(), ScreenResolutions.DESKTOP_800_600.getHeight());
+        camera = new OrthographicCamera(screenResolution.getWidth(), screenResolution.getHeight());
 
         // Set camera to map origin x0, y0.
         Vector2 tempVector = IsometricUtil.isometricProjection(0, 0, tileWidthHalf, tileHeightHalf, mapRotation);
@@ -139,6 +145,11 @@ public class IsometricTest extends ApplicationAdapter {
         // Viewbounds rectangle
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
+
+        // Stop continuous rendering to be able to read console output
+        // Remove when merging with game code
+//        Gdx.graphics.setContinuousRendering(false);
+//        Gdx.graphics.requestRendering();
     }
 
     private Vector2 tempVector;

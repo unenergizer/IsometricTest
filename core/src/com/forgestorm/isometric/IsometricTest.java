@@ -213,6 +213,7 @@ public class IsometricTest extends ApplicationAdapter {
         camera.viewportHeight = height;
         camera.update();
         stageHandler.getStage().getViewport().update(width, height);
+        mapRenderer.setScreenRenderDistance();
     }
 
     @Override

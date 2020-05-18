@@ -52,9 +52,13 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     public IsometricTileMapRenderer(IsometricTest isometricTest, TiledMap map, Batch batch) {
         super(map, batch);
         this.isometricTest = isometricTest;
-        screenRenderDistance = (Gdx.graphics.getWidth() + Gdx.graphics.getHeight()) / (isometricTest.getTileWidth() + isometricTest.getTileHeight());
+        setScreenRenderDistance();
         System.out.println("Screen Render Distance: " + screenRenderDistance);
         System.out.println("Width: " + Gdx.graphics.getWidth() + ", Height: " + Gdx.graphics.getHeight());
+    }
+
+    public void setScreenRenderDistance() {
+        screenRenderDistance = (Gdx.graphics.getWidth() + Gdx.graphics.getHeight()) / (isometricTest.getTileWidth() + isometricTest.getTileHeight());
     }
 
     @Override
@@ -87,8 +91,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
                 isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), isometricTest.getMapRotation());
 
         int renderDistance = (int) (screenRenderDistance * isometricTest.getCamera().zoom) + 4;
-//        int renderDistance = (int) (screenRenderDistance + 4);
-
         System.out.println("CellRenderDistance: " + renderDistance + ", Zoom: " + isometricTest.getCamera().zoom);
 
         startX = (int) (centerCell.x - renderDistance);
@@ -104,7 +106,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = endY; y >= startY; y--) {
                 for (int x = startX; x <= endX; x++) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY, mapRotation);
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
                     if (tileWasRendered) tilesRendered++;
                 }
             }
@@ -113,7 +115,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             for (int y = startY; y <= endY; y++) {
                 for (int x = endX; x >= startX; x--) {
                     Vector2 tempVector = IsometricUtil.isometricProjection(x, y, isometricTest.getTileWidthHalf(), isometricTest.getTileHeightHalf(), mapRotation);
-                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY, mapRotation);
+                    boolean tileWasRendered = renderRotation(layer, color, x, y, tempVector.x, tempVector.y, layerOffsetX, layerOffsetY);
                     if (tileWasRendered) tilesRendered++;
                 }
             }
@@ -121,7 +123,7 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private boolean renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY, int mapRotation) {
+    private boolean renderRotation(TiledMapTileLayer layer, float color, int col, int row, float x, float y, float layerOffsetX, float layerOffsetY) {
         final TiledMapTileLayer.Cell cell = layer.getCell(col, row);
         if (cell == null) return false;
 
@@ -137,7 +139,6 @@ public class IsometricTileMapRenderer extends BatchTiledMapRenderer {
             boolean flipX = cell.getFlipHorizontally();
             boolean flipY = cell.getFlipVertically();
             int rotations = cell.getRotation();
-//            int rotations = mapRotation;
 
 
             TextureRegion region = tile.getTextureRegion();
